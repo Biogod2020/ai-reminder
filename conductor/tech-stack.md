@@ -1,24 +1,38 @@
-# Technology Stack - Notion-Soul-Agent (SOTA)
+# Technology Stack - Notion-Soul-Agent (SOTA - Decoupled Edition)
 
-## Core Languages & Architecture: Python + Swift
-- **Python 3.11+ (Logic & AI):** The primary language for the agent's reasoning, Notion integration, and data processing.
-- **Swift / SwiftUI (UI & macOS Integration):** Used to build a high-performance, native macOS experience, including the Menu Bar app and system-level integrations (App Intents, Push Notifications).
-- **Architecture:** A hybrid model where a Python-based core handles the "brain" (Gemini 3.1, Notion sync) and a Swift-based wrapper manages the "body" (UI, macOS system services).
+## 1. 核心语言与混合架构 (Core Languages & Architecture)
+- **Python 3.11+ (Logic & AI Core):** 
+    - 负责核心推理、Notion 同步引擎、CLT 负荷计算及生物排程算法。
+    - **性能优化：** 使用 `asyncio` 与 `httpx` 处理高并发请求。
+- **Swift / SwiftUI (macOS Native & UI):** 
+    - 构建高性能 Menu Bar 应用及 Floating Panel。
+    - 通过 **App Intents** 接入 macOS 系统服务。
+- **Decoupled Link:** Python 逻辑层通过 **JSON-RPC** 或 Unix Domain Socket 与 Swift UI 层通信，实现极低延迟的本地交互。
 
-## AI & Agent Orchestration: LangGraph & Gemini
-- **LangGraph / PydanticAI:** Used to orchestrate the stateful, multi-step "Clarification Loop" and "Proactive Scheduling" workflows.
-- **google-generativeai SDK:** Direct integration with **Gemini 3.1 Flash-Lite** for multimodal task extraction and reasoning.
-- **Langfuse:** Integrated for observability, tracing, and prompt management, ensuring a high-quality "Clarification Loop."
+## 2. AI 推理与 Agent 编排 (AI & Agent Orchestration)
+- **Gemini 3.1 Flash-Lite:** 
+    - 核心多模态 VLM，利用其 **1M Context Window** 处理长程任务轨迹。
+- **LangGraph / PydanticAI:** 
+    - 实现 **Clarification Loop** 的状态机控制，支持复杂的循环决策流。
+- **Langfuse:** 
+    - 生产级监控，记录 Prompt 迭代、推理时延及 Agent 决策路径。
 
-## UI & System Integration: Webview & macOS Services
-- **Webview / Custom UI:** A lightweight, Notion-inspired interface that can be embedded or opened within a floating panel to maintain a consistent workspace feel.
+## 3. 系统集成与感知 (System Integration & Observer)
 - **macOS System Services:**
-    - **`SMAppService` / `LaunchAgent`:** For background persistence.
-    - **`UserNotifications` Framework:** For proactive, interactive push notifications.
-    - **Accessibility API (`AXUIElement`):** To intelligently perceive the user's current onscreen context (e.g., in Notion).
-- **Notion SDK:** For deep, bidirectional synchronization with the `Tasks [UT]` database.
+    - **`SMAppService` / `LaunchAgent`:** 确保后台常驻与自启动。
+    - **`UserNotifications` Framework:** 实现带交互按钮的原生推送。
+    - **Accessibility API (`AXUIElement`):** 实时感知当前活跃 App，作为认知负荷计算的环境特征。
+- **Notion SDK:** 
+    - 用于本地数据与 Notion `Tasks [UT]` 数据库的镜像映射。
 
-## Data Persistence & Memory: SQLite & SwiftData
-- **SQLite + SwiftData:** The primary local-first storage for task history, user preferences, and "User Soul" (habits/patterns).
-- **JSON / YAML:** For human-readable configuration, environment settings, and lightweight state management.
-- **Privacy-First:** All sensitive user data and cognitive load metrics are stored locally to ensure maximum privacy and offline availability.
+## 4. 数据存储与跨端推送 (Persistence & Mobile Gateway)
+- **本地主数据库 (Primary Source):**
+    - **SQLite + SwiftData:** 本地优先存储，记录任务图谱、User Soul 模型、以及高频执行日志。
+- **移动端推送网关 (Mobile Push):**
+    - **Firebase (FCM) / Supabase Realtime:** 作为跨端消息中继，实现 iPhone 原生 APNs 推送。
+- **配置管理:** 
+    - 使用 **YAML / JSON** 存储模型参数、API 配置及用户自定义偏好。
+
+## 5. 性能与隐私工程 (Engineering Standards)
+- **Zero-Latency Logic:** 核心排程不依赖外网，仅同步至 Notion 时进行异步 I/O。
+- **Local-Only Biometrics:** 用户的疲劳度原始指标、心率等隐私数据仅存本地 SQLite，不上传至 Notion 或云端。
