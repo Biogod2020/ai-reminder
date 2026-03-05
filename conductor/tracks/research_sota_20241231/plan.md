@@ -8,8 +8,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Research and Data Gathering' (Protocol in workflow.md)
 
 ## Phase 2: Architectural Refinement
-- [ ] Task: Refine the core Agent architecture
-    - [ ] Create a detailed architecture diagram (text-based)
-    - [ ] Define the state machine for the Clarification Loop
-    - [ ] Define the integration points for macOS system services
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Architectural Refinement' (Protocol in workflow.md)
+- [x] Task: Refine the core Agent architecture (98d152516228996652e355cd79873dc734a3fc71)
+    - [x] Create a detailed architecture diagram (text-based)
+    - [x] Define the state machine for the Clarification Loop
+    - [x] Define the integration points for macOS system services
+    - [x] Create an updated project roadmap
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Architectural Refinement' (Protocol in workflow.md)
