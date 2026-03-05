@@ -5,7 +5,7 @@ description: Search for authoritative materials, academic literature, expert sha
 
 # SOTA Researcher
 
-This skill provides a systematic workflow for discovering and synthesizing the state-of-the-art (SOTA) in any domain.
+This skill provides a systematic workflow for discovering, **acquiring**, and synthesizing the state-of-the-art (SOTA) in any domain.
 
 ## Research Workflow
 
@@ -13,9 +13,13 @@ Follow this multi-stage process to ensure high-signal results:
 
 1. **Broad Discovery**: Perform a broad `google_web_search` to identify top-tier sources, key papers, and influential blogs.
 2. **Authority Filtering**: Focus on high-authority domains (e.g., `arxiv.org`, `nature.com`, `blog.google`, `engineering.fb.com`, `medium.com` from verified experts).
-3. **Deep Extraction**: Use `web_fetch` on selected high-quality URLs to extract detailed methodology, benchmarks, and "lessons learned."
-4. **Library Context**: For software-related topics, use `context7` (`resolve-library-id` followed by `query-docs`) to get the latest official documentation.
-5. **Synthesis**: Summarize the findings into a "SOTA Report" using the provided structure.
+3. **Content Acquisition**: 
+    - Use `web_fetch` to extract clean content from high-quality URLs.
+    - Use `chrome-devtools` if the site has a complex paywall or requires JavaScript rendering.
+    - **Save the raw content** to `research/sources/` using the `save_source.py` script to ensure a persistent local library.
+4. **Deep Extraction**: Read the locally saved sources to extract detailed methodology, benchmarks, and "lessons learned."
+5. **Library Context**: For software-related topics, use `context7` (`resolve-library-id` followed by `query-docs`) to get the latest official documentation.
+6. **Synthesis**: Summarize the findings into a "SOTA Report" using the provided structure.
 
 ## Selecting Authoritative Sources
 
