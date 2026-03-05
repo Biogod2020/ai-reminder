@@ -1,13 +1,26 @@
-# Research Summary: Circadian Rhythms & Habit Formation
+# SOTA Report: Circadian Rhythms & Productivity Algorithms (2024-2025)
 
-## Models
-- **Borbély's Two-Process Model (Process C & S):** Explains alertness levels.
-- **Fogg Behavior Model (B=MAP):** Motivation, Ability, and Prompts.
+## Executive Summary
+SOTA scheduling has evolved into **hyper-personalized biological synchronization**, utilizing wearable-derived biometric data to align high-cognition tasks with individual energy peaks.
 
-## Scheduling Algorithms
-- **ChronoCal:** Six-chronotype model based on biometric data (HRV).
-- **Phillips et al. (2021):** Performance improved by 26% when tasks are aligned with chronotype peaks.
+## Current State (SOTA)
+- **Unified Model of Performance (UMP):** Combines homeostatic sleep pressure and circadian oscillators to reduce alertness impairment by 29%.
+- **Penalized Multiband Learning (PML):** Advanced ML approach for analyzing wearable actigraphy to characterize non-regular daily rhythms and 'natural variability'.
+- **Fatigue Forecasting:** Predictive algorithms now forecast cognitive capacity and risk up to 14 days in advance based on historical biometric data.
 
-## Habit Engineering
-- **Lally et al. (2010):** Average 66 days to form a habit.
-- **Atomic Habits (James Clear):** Cue, Routine, Reward framework.
+## Key Technologies/Frameworks
+- **ChronoCal:** A six-chronotype model (Morning, Evening, Highly Active, etc.) that replaces traditional 2-type models.
+- **Circadian-Informed Lighting:** Rhythmic lighting schemes (blue-enriched for delays) that can retime the body clock and increase sleep duration by ~50 mins.
+
+## Expert Consensus & Trends
+- **Hyper-Personalization:** Shift toward 'federated learning' models that personalize schedules without compromising biometric privacy.
+- **Federated Scheduling:** Synchronization windows for teams based on collective circadian peaks.
+
+## Actionable Recommendations
+- Use **HRV (Heart Rate Variability)** from wearables as a real-time proxy for cognitive readiness.
+- Map high-intrinsic load tasks to predicted **UMP Alertness Peaks**.
+
+## Sources & Citations
+- [Sleep 2024] Optimization of Alertness windows using UMP.
+- [Fatigue Science 2025] Forecast alertness risks 2 weeks in advance.
+- [Chronocal.io] SOTA Chronotype Modeling.
