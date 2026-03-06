@@ -4,9 +4,9 @@
 - [x] Task: Scaffold Chainlit UI and Multi-modal Input f17052e
     - [x] Create `ui/console.py` with basic Chainlit setup.
     - [x] Implement message history and thought visualization blocks.
-- [ ] Task: Implement NL Intent Dispatcher (LangGraph)
-    - [ ] Create `core/orchestrator.py` with a LangGraph state machine.
-    - [ ] Define intent classification nodes (Memory, Task, Planner, Clarify).
+- [x] Task: Implement NL Intent Dispatcher (LangGraph) dd7c1c1
+    - [x] Create `core/orchestrator.py` with a LangGraph state machine.
+    - [x] Define intent classification nodes (Memory, Task, Planner, Clarify).
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Chainlit UI & Basic Dispatcher' (Protocol in workflow.md)
 
 ## Phase 2: Memory & Task Integration
