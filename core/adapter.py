@@ -19,43 +19,34 @@ class GeminiAdapter:
         Raises:
             ValueError: If no API key is provided or found in the environment.
         """
-        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
-        
-        # Use local proxy if enabled in environment
         use_local_proxy = os.getenv('USE_LOCAL_PROXY', 'false').lower() == 'true'
-        self.base_url = base_url or (os.getenv('LOCAL_PROXY_URL', 'http://localhost:8888') if use_local_proxy else None)
+        proxy_password = os.getenv('PROXY_PASSWORD', '123456')
         
+        # If using proxy, the 'api_key' for the client should be the proxy password
+        if use_local_proxy:
+            self.api_key = proxy_password
+            self.base_url = base_url or os.getenv('LOCAL_PROXY_URL', 'http://localhost:8888')
+            self.model_id = 'gemini-3-flash-preview' # SOTA model supported by proxy
+        else:
+            self.api_key = api_key or os.getenv('GEMINI_API_KEY')
+            self.base_url = base_url
+            self.model_id = 'gemini-3.1-flash-lite-preview'
+
         if not self.api_key:
-            raise ValueError('GEMINI_API_KEY must be provided or set in environment')
+            raise ValueError('GEMINI_API_KEY (or PROXY_PASSWORD) must be provided')
 
         http_options = {}
         if self.base_url:
             http_options['base_url'] = self.base_url
-            
-            # Add proxy password if provided
-            proxy_password = os.getenv('PROXY_PASSWORD')
-            if proxy_password:
-                http_options['headers'] = {"X-Proxy-Password": proxy_password}
 
         self.client = genai.Client(
             api_key=self.api_key,
             http_options=http_options if http_options else None
         )
-        # Updated to Gemini 3.1 Flash-Lite
-        self.model_id = 'gemini-3.1-flash-lite-preview'
         self.skill_manager = SkillManager(skills_dir)
 
     async def generate_content(self, prompt: str, images: Optional[List[Any]] = None, skill_name: Optional[str] = None) -> str:
-        """Generates content asynchronously, supporting optional skill mounting.
-
-        Args:
-            prompt: The text prompt to send to the model.
-            images: Optional list of image data to include in the request.
-            skill_name: Optional name of a skill to mount as a system instruction.
-
-        Returns:
-            The generated text response.
-        """
+        """Generates content asynchronously, supporting optional skill mounting."""
         system_instruction = None
         if skill_name:
             system_instruction = self.skill_manager.get_skill_instructions(skill_name)
@@ -72,15 +63,7 @@ class GeminiAdapter:
         return response.text
 
     async def decompose_task(self, task_title: str, context: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Decomposes a task into atomic sub-tasks using the task-atomizer skill.
-
-        Args:
-            task_title: The title of the task to decompose.
-            context: Optional additional user context to inform the decomposition.
-
-        Returns:
-            A list of dictionaries, each representing an atomic sub-task.
-        """
+        """Decomposes a task into atomic sub-tasks using the task-atomizer skill."""
         prompt = f"Please decompose the following task: '{task_title}'."
         if context:
             prompt += f"\n\nAdditional User Context:\n{context}"
@@ -90,15 +73,14 @@ class GeminiAdapter:
         # We use the 'task-atomizer' skill for this request
         response_text = await self.generate_content(prompt, skill_name='task-atomizer')
         
-        # Basic JSON extraction (Gemini might wrap it in markdown blocks)
+        # Basic JSON extraction
         clean_json = response_text.strip()
-        if clean_json.startswith("```json"):
+        if "```json" in clean_json:
             clean_json = clean_json.split("```json")[1].split("```")[0].strip()
-        elif clean_json.startswith("```"):
+        elif "```" in clean_json:
             clean_json = clean_json.split("```")[1].split("```")[0].strip()
             
         try:
             return json.loads(clean_json)
         except json.JSONDecodeError:
-            # Fallback or error handling could go here
             return [{"title": "Error parsing AI response", "raw": response_text}]

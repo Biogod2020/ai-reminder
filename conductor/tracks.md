@@ -16,3 +16,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Backend MVP Refinement & API Optimization**
 *Link: [./tracks/backend_mvp_20241231/](./tracks/backend_mvp_20241231/)*
+
+---
+
+- [ ] **Track: Proactive Wisdom & Dynamic Buffer (Proactive Soul)**
+*Link: [./tracks/proactive_soul_20241231/](./tracks/proactive_soul_20241231/)*
