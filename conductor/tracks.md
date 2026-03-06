@@ -19,5 +19,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Proactive Wisdom & Dynamic Buffer (Proactive Soul)**
+- [x] **Track: Proactive Wisdom [~] **Track: Proactive Wisdom & Dynamic Buffer Dynamic Buffer (Proactive Soul)**
 *Link: [./tracks/proactive_soul_20241231/](./tracks/proactive_soul_20241231/)*
