@@ -1,0 +1,8 @@
+{
+  "track_id": "universal_console_20241231",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2024-12-31T00:00:00Z",
+  "updated_at": "2024-12-31T00:00:00Z",
+  "description": "Build Universal Soul Console with Chainlit and NL-to-Action Dispatcher"
+}
