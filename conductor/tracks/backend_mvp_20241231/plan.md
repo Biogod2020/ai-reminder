@@ -25,9 +25,9 @@
     - [x] Script to populate `notion_soul.db` with diverse sample tasks.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Strategic Features - [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Features & Seeding' (Protocol in workflow.md) Seeding' (Protocol in workflow.md) d117508
 
-## Phase 4: Validation & Tooling
+## Phase 4: Validation ## Phase 4: Validation & Tooling Tooling [checkpoint: 7693374]
 - [x] Task: Build CLI End-to-End Tester f07c353
     - [x] Create `scripts/test_agent.py` to simulate multi-turn chats.
 - [x] Task: Comprehensive Integration Tests 1b988d4
     - [x] Expand `tests/test_api.py` to cover full persistence and re-planning.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Validation & Tooling' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Validation - [ ] Task: Conductor - User Manual Verification 'Phase 4: Validation & Tooling' (Protocol in workflow.md) Tooling' (Protocol in workflow.md) 7693374
