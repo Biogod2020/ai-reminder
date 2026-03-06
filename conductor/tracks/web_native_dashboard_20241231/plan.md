@@ -4,9 +4,9 @@
 - [x] Task: Initialize React + Vite Project 485da9d
     - [x] Run `npm create vite@latest frontend -- --template react-ts`.
     - [x] Configure Tailwind CSS for Notion-Minimalist styling.
-- [ ] Task: Integrate Electron Wrapper
-    - [ ] Setup basic Electron main process with Tray support.
-    - [ ] Enable transparency and backdrop-blur settings.
+- [x] Task: Integrate Electron Wrapper b06e5fd
+    - [x] Setup basic Electron main process with Tray support.
+    - [x] Enable transparency and backdrop-blur settings.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Web-Native Scaffolding' (Protocol in workflow.md)
 
 ## Phase 2: Core Views & Real-time Bridge
