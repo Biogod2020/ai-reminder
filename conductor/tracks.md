@@ -24,6 +24,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Build Web-Native Liquid Dashboard (Track 6)**
+- [x] **Track: Build Web-Native Liquid Dashboard (Track 6)**
 *Link: [./tracks/web_native_dashboard_20241231/](./tracks/web_native_dashboard_20241231/)*
 
