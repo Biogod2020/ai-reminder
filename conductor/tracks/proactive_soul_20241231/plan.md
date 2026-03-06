@@ -1,7 +1,7 @@
 # Implementation Plan: Proactive Wisdom & Dynamic Buffer (Proactive Soul)
 
 ## Phase 1: Dynamic Slack & Refined Decomposition
-- [ ] Task: Update Task model and Atomizer Skill
+- [~] Task: Update Task model and Atomizer Skill
     - [ ] Update `Task` model in `core/models.py` to include `duration_minutes` and `slack_minutes`.
     - [ ] Implement Slack estimation prompts in `core/skills/task-atomizer/SKILL.md`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Dynamic Slack & Refined Decomposition' (Protocol in workflow.md)

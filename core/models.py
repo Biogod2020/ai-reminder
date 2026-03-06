@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional, List
-from sqlalchemy import String, Float, DateTime, ForeignKey
+from sqlalchemy import String, Float, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
     pass
 
 class Task(Base):
-    """SQLAlchemy model representing a task, supporting recursive sub-tasks."""
+    """SQLAlchemy model representing a task, supporting recursive sub-tasks and proactive scheduling."""
     __tablename__ = 'tasks'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -18,6 +18,10 @@ class Task(Base):
     cognitive_load_score: Mapped[float] = mapped_column(Float, default=0.0)
     sync_status: Mapped[str] = mapped_column(String(50), default='pending')
     
+    # Proactive Scheduling Fields
+    duration_minutes: Mapped[int] = mapped_column(Integer, default=30)
+    slack_minutes: Mapped[int] = mapped_column(Integer, default=5)
+
     # Recursive Relationship
     parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tasks.id'))
     children: Mapped[List["Task"]] = relationship("Task", backref="parent", remote_side=[id])
