@@ -1,13 +1,13 @@
 # Implementation Plan: Backend MVP Refinement & API Optimization
 
-## Phase 1: API Optimization & Observability
+## Phase 1: API Optimization ## Phase 1: API Optimization & Observability Observability [checkpoint: e2d7611]
 - [x] Task: Implement API Proxy - [~] Task: Implement API Proxy & Authentication Authentication a4e7816
     - [x] Update `GeminiAdapter` to support local proxy switch and password auth.
     - [x] Add `USE_LOCAL_PROXY` and `PROXY_PASSWORD` to `.env`.
 - [x] Task: Integrate Langfuse Tracing e975465
     - [x] Install `langfuse` and configure in `orchestrator.py`.
     - [x] Add tracing decorators/calls to LangGraph nodes.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: API Optimization & Observability' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: API Optimization - [ ] Task: Conductor - User Manual Verification 'Phase 1: API Optimization & Observability' (Protocol in workflow.md) Observability' (Protocol in workflow.md) e2d7611
 
 ## Phase 2: Persistence & Recursive Logic (ADaPT)
 - [ ] Task: Implement Task Tree Persistence
