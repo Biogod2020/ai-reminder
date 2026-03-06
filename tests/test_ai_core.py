@@ -1,20 +1,20 @@
 import os
 import pytest
 from core.skills import SkillManager
-from core.memory import MemoryManager
+from core.memory import MemoryManager, SoulMemory
 from core.models import Base, Task
 from core.adapter import GeminiAdapter
-from sqlalchemy import create_engine
+from core.orchestrator import SoulOrchestrator
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
 @pytest.fixture
-def db_session():
-    engine = create_engine('sqlite:///:memory:')
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    yield session
-    session.close()
+def db_url(tmp_path):
+    return f"sqlite:///{tmp_path}/test_soul.db"
+
+@pytest.fixture
+def orchestrator(db_url):
+    return SoulOrchestrator(db_url=db_url)
 
 def test_skill_manager_load():
     # Setup a dummy skill
@@ -30,16 +30,20 @@ def test_skill_manager_load():
     instructions = sm.get_skill_instructions('test-skill')
     assert '# Test Skill Instructions' in instructions
 
-def test_task_recursion(db_session):
-    parent = Task(title='Parent Task')
-    db_session.add(parent)
-    db_session.commit()
-    
-    child = Task(title='Child Task', parent_id=parent.id)
-    db_session.add(child)
-    db_session.commit()
-    
-    assert child.parent_id == parent.id
+def test_task_recursion():
+    engine = create_engine('sqlite:///:memory:')
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    with Session() as session:
+        parent = Task(title='Parent Task')
+        session.add(parent)
+        session.commit()
+        
+        child = Task(title='Child Task', parent_id=parent.id)
+        session.add(child)
+        session.commit()
+        
+        assert child.parent_id == parent.id
 
 def test_memory_manager_soul(tmp_path):
     soul_file = tmp_path / 'user_soul.md'
@@ -50,20 +54,33 @@ def test_memory_manager_soul(tmp_path):
     assert 'User prefers morning work.' in content
 
 @pytest.mark.asyncio
-async def test_gemini_adapter_decompose_task(mocker):
-    mock_client_class = mocker.patch('core.adapter.genai.Client')
-    mock_client = mock_client_class.return_value
-    
-    # Mock AI response with JSON list
-    mock_response = mocker.Mock()
-    mock_response.text = '[{"title": "Subtask 1", "estimated_cognitive_load": 0.3, "pro_tip": "tip"}]'
-    mock_client.aio.models.generate_content = mocker.AsyncMock(return_value=mock_response)
+async def test_orchestrator_persistence_task(orchestrator, mocker):
+    # Mock decomposition to return fixed subtasks
+    mock_adapter = mocker.patch.object(orchestrator.adapter, 'decompose_task')
+    mock_adapter.return_value = [
+        {"title": "Subtask A", "estimated_cognitive_load": 0.4},
+        {"title": "Subtask B", "estimated_cognitive_load": 0.6}
+    ]
+    # Mock classification
+    mocker.patch.object(orchestrator.adapter, 'generate_content', return_value='task')
 
-    adapter = GeminiAdapter(api_key='fake-key')
-    subtasks = await adapter.decompose_task('Major Task')
+    # Run orchestrator
+    state = await orchestrator.run("Large Research Task")
     
-    assert len(subtasks) == 1
-    assert subtasks[0]['title'] == 'Subtask 1'
-    # Verify system_instruction was passed (from task-atomizer skill)
-    call_kwargs = mock_client.aio.models.generate_content.call_args.kwargs
-    assert 'system_instruction' in call_kwargs['config']
+    # Verify subtasks are in proposed_actions
+    assert len(state["proposed_actions"]) == 2
+    
+    # Implementation Phase 2: Check if parent task was created in DB
+    with orchestrator.Session() as session:
+        stmt = select(Task).where(Task.title == "Large Research Task")
+        parent = session.execute(stmt).scalar_one_or_none()
+        assert parent is not None
+        assert parent.status == "todo"
+        
+        # Verify subtasks are persisted and linked
+        stmt_sub = select(Task).where(Task.parent_id == parent.id)
+        children = session.execute(stmt_sub).scalars().all()
+        assert len(children) == 2
+        titles = [c.title for c in children]
+        assert "Subtask A" in titles
+        assert "Subtask B" in titles

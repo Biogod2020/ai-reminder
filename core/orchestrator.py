@@ -83,8 +83,31 @@ class SoulOrchestrator:
         return state["intent"] or "clarify"
 
     async def _node_handle_task(self, state: AgentState) -> AgentState:
-        """Node: Decomposes a task and proposes actions."""
+        """Decomposes a task and persists the entire tree to the database."""
         subtasks = await self.adapter.decompose_task(state["user_input"])
+        
+        # Recursive Persistence: Create parent and child tasks in DB
+        with self.Session() as session:
+            new_parent = Task(
+                title=state["user_input"],
+                status='todo',
+                sync_status='pending'
+            )
+            session.add(new_parent)
+            session.flush() # Get ID before commit
+            
+            for st in subtasks:
+                child = Task(
+                    title=st.get("title", "Untitled Subtask"),
+                    parent_id=new_parent.id,
+                    cognitive_load_score=st.get("estimated_cognitive_load", 0.0),
+                    status='todo',
+                    sync_status='pending'
+                )
+                session.add(child)
+            
+            session.commit()
+
         return {
             **state, 
             "proposed_actions": subtasks, 
@@ -93,7 +116,7 @@ class SoulOrchestrator:
         }
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
-        """Node: Processes memory-related intents using SoulMemory."""
+        """Processes memory-related intents using SoulMemory."""
         await self.memory.add_fact(state["user_input"])
         return {**state, "response": "I've updated your 'Digital Soul' with this information.", "notify_user": True}
 
@@ -116,14 +139,7 @@ class SoulOrchestrator:
         return state
 
     async def classify_intent(self, user_input: str) -> str:
-        """Determines the intent of the user's input.
-
-        Args:
-            user_input: The raw string input from the user.
-
-        Returns:
-            The intent category (task, memory, planner, clarify).
-        """
+        """Determines the intent of the user's input."""
         prompt = f"Classify the following user input into one of these categories: 'task', 'memory', 'planner', 'clarify'.\n\nInput: {user_input}\n\nOutput only the category name."
         response = await self.adapter.generate_content(prompt)
         clean_response = response.strip().lower()
@@ -132,11 +148,7 @@ class SoulOrchestrator:
         return 'clarify'
 
     async def get_optimized_view(self) -> Dict[str, Any]:
-        """Fetches tasks and returns a structured view for the dashboard.
-
-        Returns:
-            A dictionary containing calendar and kanban formatted data.
-        """
+        """Fetches tasks and returns a structured view for the dashboard."""
         with self.Session() as session:
             stmt = select(Task)
             tasks = session.execute(stmt).scalars().all()
@@ -164,20 +176,16 @@ class SoulOrchestrator:
             }
 
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
-        """Executes the orchestrator graph with Langfuse tracing.
-
-        Args:
-            user_input: The raw string input from the user.
-            history: Optional list of previous message turns.
-
-        Returns:
-            The final AgentState after execution.
-        """
-        # Create a trace in Langfuse
-        trace = self.langfuse.trace(
-            name="Orchestrator Run",
-            input={"user_input": user_input, "history": history}
-        )
+        """Executes the orchestrator graph with Langfuse tracing."""
+        # Safety check for langfuse client initialization
+        trace = None
+        try:
+            trace = self.langfuse.trace(
+                name="Orchestrator Run",
+                input={"user_input": user_input, "history": history}
+            )
+        except Exception:
+            pass 
         
         initial_state: AgentState = {
             "user_input": user_input,
@@ -193,6 +201,7 @@ class SoulOrchestrator:
         final_state = await self.graph.ainvoke(initial_state)
         
         # Update trace with output
-        trace.update(output={"intent": final_state["intent"], "response": final_state["response"]})
+        if trace:
+            trace.update(output={"intent": final_state["intent"], "response": final_state["response"]})
         
         return final_state
