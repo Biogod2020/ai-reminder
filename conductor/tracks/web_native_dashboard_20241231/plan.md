@@ -1,13 +1,13 @@
 # Implementation Plan: Build Web-Native Liquid Dashboard (Track 6)
 
-## Phase 1: Web-Native Scaffolding
+## Phase 1: Web-Native Scaffolding [checkpoint: 1766be1]
 - [x] Task: Initialize React + Vite Project 485da9d
     - [x] Run `npm create vite@latest frontend -- --template react-ts`.
     - [x] Configure Tailwind CSS for Notion-Minimalist styling.
 - [x] Task: Integrate Electron Wrapper b06e5fd
     - [x] Setup basic Electron main process with Tray support.
     - [x] Enable transparency and backdrop-blur settings.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Web-Native Scaffolding' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Web-Native Scaffolding' (Protocol in workflow.md) 1766be1
 
 ## Phase 2: Core Views & Real-time Bridge
 - [ ] Task: Implement Interleaved Calendar Widget
