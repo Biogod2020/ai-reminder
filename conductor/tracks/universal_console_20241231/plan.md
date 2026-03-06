@@ -10,9 +10,9 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Chainlit UI & Basic Dispatcher' (Protocol in workflow.md)
 
 ## Phase 2: Memory & Task Integration
-- [ ] Task: Integrate Memory Framework (mem0/Letta)
-    - [ ] Install and configure `mem0` or `letta` for local use.
-    - [ ] Implement `SoulMemory` class to bridge the framework with `user_soul.md`.
+- [x] Task: Integrate Memory Framework (mem0/Letta) 7dda6c0
+    - [x] Install and configure `mem0` or `letta` for local use.
+    - [x] Implement `SoulMemory` class to bridge the framework with `user_soul.md`.
 - [ ] Task: Implement Task Creation & Atomization Action
     - [ ] Link the dispatcher to the existing `decompose_task` logic.
     - [ ] Create a confirmation card in Chainlit for task approval.
