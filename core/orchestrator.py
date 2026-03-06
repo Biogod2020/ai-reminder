@@ -1,6 +1,7 @@
 from typing import TypedDict, Optional, List, Any, Dict
 from datetime import datetime, timezone
 import json
+import random
 from langgraph.graph import StateGraph, END
 from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import sessionmaker
@@ -102,7 +103,7 @@ class SoulOrchestrator:
                 child = Task(
                     title=st.get("title", "Untitled Subtask"),
                     parent_id=new_parent.id,
-                    cognitive_load_score=st.get("estimated_cognitive_load", 0.0),
+                    cognitive_load_score=st.get("estimated_cognitive_load", 0.5), # Default to 0.5 if AI misses it
                     duration_minutes=st.get("duration_minutes", 20),
                     slack_minutes=st.get("slack_minutes", 5),
                     status='todo',
@@ -173,19 +174,16 @@ class SoulOrchestrator:
             if not task:
                 return {"action": "Error", "message": "Task not found"}
             
-            # Use proactive-nudger to handle feedback
             prompt = f"User feedback for task '{task.title}': '{user_feedback}'.\nStatus: {task.status}.\n\nPlease provide a scientific re-plan suggestion."
             
             response_text = await self.adapter.generate_content(prompt, skill_name='proactive-nudger')
             
-            # Clean JSON
             clean_json = response_text.strip()
             if "```json" in clean_json:
                 clean_json = clean_json.split("```json")[1].split("```")[0].strip()
             
             try:
                 data = json.loads(clean_json)
-                # Update task status based on AI suggested action
                 ai_action = data.get("suggested_action", "Continue")
                 if ai_action == "Delay":
                     task.status = 'todo'
@@ -204,8 +202,17 @@ class SoulOrchestrator:
                 return {"action": "Continue", "response": "I've noted your feedback."}
 
     async def classify_intent(self, user_input: str) -> str:
-        """Determines the intent of the user's input."""
-        prompt = f"Classify the following user input into one of these categories: 'task', 'memory', 'planner', 'clarify'.\n\nInput: {user_input}\n\nOutput only the category name."
+        """Determines the intent of the user's input with improved prompt."""
+        prompt = f"""
+        Classify the following user input into EXACTLY one of these categories:
+        - 'task': If the user wants to add, create, or do a specific task/project.
+        - 'memory': If the user is sharing a preference, habit, or personal fact.
+        - 'planner': If the user wants to reschedule the entire week or month.
+        - 'clarify': If the input is too vague.
+
+        Input: {user_input}
+        Output only the category name (lowercase).
+        """
         response = await self.adapter.generate_content(prompt)
         clean_response = response.strip().lower()
         if clean_response in ['task', 'memory', 'planner', 'clarify']:
@@ -243,11 +250,20 @@ class SoulOrchestrator:
     async def get_optimized_view(self) -> Dict[str, Any]:
         """Fetches tasks and returns a scientifically interleaved view for the dashboard."""
         with self.Session() as session:
-            stmt = select(Task).where(Task.parent_id == None) 
-            tasks = session.execute(stmt).scalars().all()
+            stmt = select(Task)
+            all_tasks = session.execute(stmt).scalars().all()
             
-            heavy_tasks = [t for t in tasks if t.cognitive_load_score >= 0.5]
-            light_tasks = [t for t in tasks if t.cognitive_load_score < 0.5]
+            # Filter for viewable tasks (no parent or approved)
+            viewable_tasks = [t for t in all_tasks if t.parent_id is None or t.sync_status == 'approved']
+            
+            # SOTA Interleaving Logic: 
+            # 1. Fill scores if missing (randomize for variety if not set)
+            for t in viewable_tasks:
+                if t.cognitive_load_score == 0.0:
+                    t.cognitive_load_score = round(random.uniform(0.1, 0.9), 2)
+            
+            heavy_tasks = [t for t in viewable_tasks if t.cognitive_load_score >= 0.5]
+            light_tasks = [t for t in viewable_tasks if t.cognitive_load_score < 0.5]
             
             heavy_tasks.sort(key=lambda x: x.cognitive_load_score, reverse=True)
             light_tasks.sort(key=lambda x: x.cognitive_load_score, reverse=True)
@@ -274,9 +290,9 @@ class SoulOrchestrator:
             return {
                 "calendar": calendar_view,
                 "kanban": {
-                    "todo": [t.title for t in tasks if t.status == 'todo'],
-                    "in_progress": [t.title for t in tasks if t.status == 'in_progress'],
-                    "done": [t.title for t in tasks if t.status == 'done']
+                    "todo": [t.title for t in viewable_tasks if t.status == 'todo'],
+                    "in_progress": [t.title for t in viewable_tasks if t.status == 'in_progress'],
+                    "done": [t.title for t in viewable_tasks if t.status == 'done']
                 }
             }
 
