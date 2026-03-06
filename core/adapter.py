@@ -5,7 +5,20 @@ from google import genai
 from core.skills import SkillManager
 
 class GeminiAdapter:
+    """Adapter for interacting with Google's Gemini AI models with skill support."""
+
     def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None, skills_dir: str = 'core/skills'):
+        """Initializes the GeminiAdapter.
+
+        Args:
+            api_key: The Google AI API key. If not provided, it will be read from the
+                GEMINI_API_KEY environment variable.
+            base_url: Optional custom base URL for the API.
+            skills_dir: The directory where skill definitions are stored.
+
+        Raises:
+            ValueError: If no API key is provided or found in the environment.
+        """
         self.api_key = api_key or os.getenv('GEMINI_API_KEY')
         self.base_url = base_url
         
@@ -24,7 +37,16 @@ class GeminiAdapter:
         self.skill_manager = SkillManager(skills_dir)
 
     async def generate_content(self, prompt: str, images: Optional[List[Any]] = None, skill_name: Optional[str] = None) -> str:
-        """Generates content asynchronously, supporting optional skill mounting."""
+        """Generates content asynchronously, supporting optional skill mounting.
+
+        Args:
+            prompt: The text prompt to send to the model.
+            images: Optional list of image data to include in the request.
+            skill_name: Optional name of a skill to mount as a system instruction.
+
+        Returns:
+            The generated text response.
+        """
         system_instruction = None
         if skill_name:
             system_instruction = self.skill_manager.get_skill_instructions(skill_name)
@@ -41,7 +63,15 @@ class GeminiAdapter:
         return response.text
 
     async def decompose_task(self, task_title: str, context: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Decomposes a task using the task-atomizer skill."""
+        """Decomposes a task into atomic sub-tasks using the task-atomizer skill.
+
+        Args:
+            task_title: The title of the task to decompose.
+            context: Optional additional user context to inform the decomposition.
+
+        Returns:
+            A list of dictionaries, each representing an atomic sub-task.
+        """
         prompt = f"Please decompose the following task: '{task_title}'."
         if context:
             prompt += f"\n\nAdditional User Context:\n{context}"

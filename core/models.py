@@ -4,9 +4,11 @@ from sqlalchemy import String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
+    """Base class for SQLAlchemy declarative models."""
     pass
 
 class Task(Base):
+    """SQLAlchemy model representing a task, supporting recursive sub-tasks."""
     __tablename__ = 'tasks'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -24,6 +26,7 @@ class Task(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class UserSoul(Base):
+    """SQLAlchemy model representing user-specific habits and preferences."""
     __tablename__ = 'user_soul'
 
     id: Mapped[int] = mapped_column(primary_key=True)
