@@ -1,4 +1,5 @@
 from typing import TypedDict, Optional, List, Any, Dict
+from datetime import datetime
 from langgraph.graph import StateGraph, END
 from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import sessionmaker
@@ -86,7 +87,7 @@ class SoulOrchestrator:
         """Decomposes a task and persists the entire tree to the database."""
         subtasks = await self.adapter.decompose_task(state["user_input"])
         
-        # Recursive Persistence: Create parent and child tasks in DB
+        # Recursive Persistence
         with self.Session() as session:
             new_parent = Task(
                 title=state["user_input"],
@@ -94,7 +95,7 @@ class SoulOrchestrator:
                 sync_status='pending'
             )
             session.add(new_parent)
-            session.flush() # Get ID before commit
+            session.flush() 
             
             for st in subtasks:
                 child = Task(
@@ -117,13 +118,9 @@ class SoulOrchestrator:
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
         """Processes memory-related intents using SoulMemory and persists to UserSoul table."""
-        # 1. Update Markdown Soul Context
         await self.memory.add_fact(state["user_input"])
         
-        # 2. Persist to UserSoul Table for structured query support
         with self.Session() as session:
-            # For MVP, we extract a key using Gemini or just use a generic one
-            # Here we'll just store the raw fact as a 'preference'
             soul_record = UserSoul(
                 key=f"fact_{datetime.now().timestamp()}",
                 value=state["user_input"],
@@ -153,21 +150,15 @@ class SoulOrchestrator:
         return state
 
     async def approve_plan(self, task_title: str):
-        """Action: User approves a proposed task tree. Updates status to 'synced'."""
+        """Action: User approves a proposed task tree."""
         with self.Session() as session:
-            # Update parent
             stmt = update(Task).where(Task.title == task_title).values(sync_status='approved')
             session.execute(stmt)
-            
-            # Update children (subtasks)
-            # Find parent ID
             parent_stmt = select(Task.id).where(Task.title == task_title)
             parent_id = session.execute(parent_stmt).scalar_one_or_none()
-            
             if parent_id:
                 child_stmt = update(Task).where(Task.parent_id == parent_id).values(sync_status='approved')
                 session.execute(child_stmt)
-            
             session.commit()
 
     async def classify_intent(self, user_input: str) -> str:
@@ -180,16 +171,28 @@ class SoulOrchestrator:
         return 'clarify'
 
     async def get_optimized_view(self) -> Dict[str, Any]:
-        """Fetches tasks and returns a structured view for the dashboard."""
+        """Fetches tasks and returns a scientifically interleaved view for the dashboard."""
         with self.Session() as session:
-            stmt = select(Task)
+            stmt = select(Task).where(Task.parent_id == None) # Get main tasks or atomized ones
             tasks = session.execute(stmt).scalars().all()
             
-            # Simple interleaving placeholder for MVP:
-            sorted_tasks = sorted(tasks, key=lambda x: x.cognitive_load_score, reverse=True)
+            # SOTA Interleaving Logic: Alternate High/Low cognitive load
+            heavy_tasks = [t for t in tasks if t.cognitive_load_score >= 0.5]
+            light_tasks = [t for t in tasks if t.cognitive_load_score < 0.5]
+            
+            # Sort each by score to maintain importance within category
+            heavy_tasks.sort(key=lambda x: x.cognitive_load_score, reverse=True)
+            light_tasks.sort(key=lambda x: x.cognitive_load_score, reverse=True)
+            
+            interleaved = []
+            while heavy_tasks or light_tasks:
+                if heavy_tasks:
+                    interleaved.append(heavy_tasks.pop(0))
+                if light_tasks:
+                    interleaved.append(light_tasks.pop(0))
             
             calendar_view = []
-            for i, t in enumerate(sorted_tasks):
+            for i, t in enumerate(interleaved):
                 hour = 9 + i
                 calendar_view.append({
                     "id": t.id,

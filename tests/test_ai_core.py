@@ -108,3 +108,24 @@ async def test_orchestrator_approve_plan(orchestrator, mocker):
         stmt_c = select(Task).where(Task.parent_id == p.id)
         c = session.execute(stmt_c).scalar_one()
         assert c.sync_status == 'approved'
+
+@pytest.mark.asyncio
+async def test_orchestrator_interleaving_logic(orchestrator, mocker):
+    # 1. Seed tasks with varying cognitive loads
+    with orchestrator.Session() as session:
+        session.add(Task(title='Heavy A', cognitive_load_score=0.9, status='todo'))
+        session.add(Task(title='Heavy B', cognitive_load_score=0.8, status='todo'))
+        session.add(Task(title='Light C', cognitive_load_score=0.2, status='todo'))
+        session.add(Task(title='Light D', cognitive_load_score=0.3, status='todo'))
+        session.commit()
+
+    # 2. Get optimized view
+    view = await orchestrator.get_optimized_view()
+    calendar = view['calendar']
+    
+    # 3. Verify Interleaving: Heavy -> Light -> Heavy -> Light
+    loads = [item['load'] for item in calendar]
+    assert loads[0] > 0.7
+    assert loads[1] < 0.4
+    assert loads[2] > 0.7
+    assert loads[3] < 0.4
