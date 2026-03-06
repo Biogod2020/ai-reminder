@@ -13,6 +13,6 @@
 - [x] Task: Implement Interleaved Calendar Widget 4f02219
     - [x] Fetch and render tasks from `/get_view_data`.
     - [x] Visually differentiate 'Task' and 'Slack' blocks.
-- [ ] Task: Implement Chat & Thought Stream
-    - [ ] Connect to `/chat` and visualize the AI reasoning step-by-step.
+- [x] Task: Implement Chat - [~] Task: Implement Chat & Thought Stream Thought Stream e57d76e
+    - [x] Connect to `/chat` and visualize the AI reasoning step-by-step.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Views & Real-time Bridge' (Protocol in workflow.md)
