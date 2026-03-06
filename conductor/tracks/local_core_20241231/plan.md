@@ -14,3 +14,6 @@
     - [x] Implement `decompose_task` using `task-atomizer` skill
     - [x] Create `narrative-soul` skill for rewarding micro-feedback
 - [x] Task: Conductor - User Manual Verification 'Phase 2: AI Strategist Integration' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 6a20b01
