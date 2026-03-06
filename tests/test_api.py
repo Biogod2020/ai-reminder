@@ -78,3 +78,15 @@ def test_api_heartbeat(mocker):
     assert response.status_code == 200
     assert response.json()["nudge_needed"] is True
     assert response.json()["message"] == "Task nudge test"
+
+def test_api_handle_response_delay(mocker):
+    # Mock re-plan logic
+    mock_orch = mocker.patch("core.api.orchestrator")
+    mock_orch.handle_user_response = mocker.AsyncMock(return_value={
+        "action": "Re-plan",
+        "new_schedule_summary": "I suggested a 15m break followed by a lighter task."
+    })
+    
+    response = client.post("/handle_response", json={"task_id": 1, "user_feedback": "I'm too tired to continue"})
+    assert response.status_code == 200
+    assert response.json()["action"] == "Re-plan"

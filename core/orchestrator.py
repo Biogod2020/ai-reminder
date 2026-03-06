@@ -164,6 +164,45 @@ class SoulOrchestrator:
                 session.execute(child_stmt)
             session.commit()
 
+    async def handle_user_response(self, task_id: int, user_feedback: str) -> Dict[str, Any]:
+        """Processes user feedback from a nudge and triggers a re-plan if needed."""
+        with self.Session() as session:
+            stmt = select(Task).where(Task.id == task_id)
+            task = session.execute(stmt).scalars().one_or_none()
+            
+            if not task:
+                return {"action": "Error", "message": "Task not found"}
+            
+            # Use proactive-nudger to handle feedback
+            prompt = f"User feedback for task '{task.title}': '{user_feedback}'.\nStatus: {task.status}.\n\nPlease provide a scientific re-plan suggestion."
+            
+            response_text = await self.adapter.generate_content(prompt, skill_name='proactive-nudger')
+            
+            # Clean JSON
+            clean_json = response_text.strip()
+            if "```json" in clean_json:
+                clean_json = clean_json.split("```json")[1].split("```")[0].strip()
+            
+            try:
+                data = json.loads(clean_json)
+                # Update task status based on AI suggested action
+                ai_action = data.get("suggested_action", "Continue")
+                if ai_action == "Delay":
+                    task.status = 'todo'
+                    task.sync_status = 'pending'
+                elif ai_action == "Skip":
+                    task.status = 'done'
+                
+                session.commit()
+                
+                return {
+                    "action": ai_action,
+                    "response": data.get("nudge_message", "Updated."),
+                    "reasoning": data.get("reasoning", "Adaptive adjustment.")
+                }
+            except Exception:
+                return {"action": "Continue", "response": "I've noted your feedback."}
+
     async def classify_intent(self, user_input: str) -> str:
         """Determines the intent of the user's input."""
         prompt = f"Classify the following user input into one of these categories: 'task', 'memory', 'planner', 'clarify'.\n\nInput: {user_input}\n\nOutput only the category name."
@@ -182,12 +221,10 @@ class SoulOrchestrator:
             if not active_task:
                 return {"nudge_needed": False}
             
-            # Use proactive-nudger skill to decide
             prompt = f"Active Task: '{active_task.title}'. Started at: {active_task.created_at}. Expected Duration: {active_task.duration_minutes}m. Slack: {active_task.slack_minutes}m.\n\nPlease decide if a nudge is needed."
             
             response_text = await self.adapter.generate_content(prompt, skill_name='proactive-nudger')
             
-            # Clean JSON
             clean_json = response_text.strip()
             if "```json" in clean_json:
                 clean_json = clean_json.split("```json")[1].split("```")[0].strip()
