@@ -28,3 +28,6 @@
 - [x] Task: Integrate Bark/Mobile Notification Hook b24e2b2
     - [x] Implement a tool node for cross-platform push notifications.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Headless API Service' (Protocol in workflow.md) 769477f
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 50bd73b
