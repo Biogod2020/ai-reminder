@@ -18,9 +18,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Persistence - [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistence & Recursive Logic' (Protocol in workflow.md) Recursive Logic' (Protocol in workflow.md) 3866728
 
 ## Phase 3: Strategic Features & Seeding
-- [ ] Task: Implement Interleaving Algorithm
-    - [ ] Logic to sequence tasks by alternating cognitive loads.
-    - [ ] Update `get_optimized_view` to use this scientific ordering.
+- [x] Task: Implement Interleaving Algorithm 888a9b4
+    - [x] Logic to sequence tasks by alternating cognitive loads.
+    - [x] Update `get_optimized_view` to use this scientific ordering.
 - [ ] Task: Create Data Seeding Script
     - [ ] Script to populate `notion_soul.db` with diverse sample tasks.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Features & Seeding' (Protocol in workflow.md)
