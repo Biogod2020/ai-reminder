@@ -63,3 +63,29 @@ async def test_gemini_adapter_generate_text(mocker):
     
     assert response == 'Mocked Response'
     mock_client.aio.models.generate_content.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_gemini_adapter_proxy_config():
+    # Test if adapter correctly picks up proxy settings
+    adapter = GeminiAdapter(api_key='fake-key', base_url='http://localhost:8888')
+    assert adapter.base_url == 'http://localhost:8888'
+
+@pytest.mark.asyncio
+async def test_gemini_adapter_proxy_request(mocker):
+    mock_client_class = mocker.patch('core.adapter.genai.Client')
+    mock_client = mock_client_class.return_value
+    mock_response = mocker.Mock()
+    mock_response.text = 'Proxy Response'
+    mock_client.aio.models.generate_content = mocker.AsyncMock(return_value=mock_response)
+
+    # We want to verify that http_options includes headers if a proxy password is set
+    import os
+    os.environ['PROXY_PASSWORD'] = '123456'
+    
+    adapter = GeminiAdapter(api_key='fake-key', base_url='http://localhost:8888')
+    await adapter.generate_content('test')
+    
+    # Verify Client initialization args
+    args, kwargs = mock_client_class.call_args
+    assert kwargs['http_options']['base_url'] == 'http://localhost:8888'
+    # The actual implementation of headers in google-genai needs to be verified

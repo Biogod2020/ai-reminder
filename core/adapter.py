@@ -5,7 +5,7 @@ from google import genai
 from core.skills import SkillManager
 
 class GeminiAdapter:
-    """Adapter for interacting with Google's Gemini AI models with skill support."""
+    """Adapter for interacting with Google's Gemini AI models with skill support and proxy optimization."""
 
     def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None, skills_dir: str = 'core/skills'):
         """Initializes the GeminiAdapter.
@@ -20,7 +20,10 @@ class GeminiAdapter:
             ValueError: If no API key is provided or found in the environment.
         """
         self.api_key = api_key or os.getenv('GEMINI_API_KEY')
-        self.base_url = base_url
+        
+        # Use local proxy if enabled in environment
+        use_local_proxy = os.getenv('USE_LOCAL_PROXY', 'false').lower() == 'true'
+        self.base_url = base_url or (os.getenv('LOCAL_PROXY_URL', 'http://localhost:8888') if use_local_proxy else None)
         
         if not self.api_key:
             raise ValueError('GEMINI_API_KEY must be provided or set in environment')
@@ -28,6 +31,11 @@ class GeminiAdapter:
         http_options = {}
         if self.base_url:
             http_options['base_url'] = self.base_url
+            
+            # Add proxy password if provided
+            proxy_password = os.getenv('PROXY_PASSWORD')
+            if proxy_password:
+                http_options['headers'] = {"X-Proxy-Password": proxy_password}
 
         self.client = genai.Client(
             api_key=self.api_key,
