@@ -1,9 +1,9 @@
 # Implementation Plan: Build Local Core Foundation
 
 ## Phase 1: Local Database Design
-- [~] Task: Define SQLite Schema with SQLAlchemy/Pydantic
-    - [ ] Create Task model with cognitive load and sync status fields
-    - [ ] Create UserSoul model for habit tracking
+- [x] Task: Define SQLite Schema with SQLAlchemy/Pydantic (a3bdf85)
+    - [x] Create Task model with cognitive load and sync status fields
+    - [x] Create UserSoul model for habit tracking
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Local Database Design' (Protocol in workflow.md)
 
 ## Phase 2: AI Adapter Implementation
