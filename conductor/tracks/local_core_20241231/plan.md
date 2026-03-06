@@ -1,13 +1,14 @@
-# Implementation Plan: Build Local Core Foundation
+# Implementation Plan: Build AI-Native Core & Soul Memory
 
-## Phase 1: Local Database Design [checkpoint: 204857c]
-- [x] Task: Define SQLite Schema with SQLAlchemy/Pydantic (a3bdf85)
-    - [x] Create Task model with cognitive load and sync status fields
-    - [x] Create UserSoul model for habit tracking
-- [x] Task: Conductor - User Manual Verification 'Phase 1: Local Database Design' (Protocol in workflow.md)
+## Phase 1: Recursive Schema & Memory Manager
+- [ ] Task: Update Models & Implement Memory Manager
+    - [ ] Update Task model to support recursive parent_id
+    - [ ] Create MemoryManager class for `user_soul.md` operations
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Recursive Schema & Memory Manager' (Protocol in workflow.md)
 
-## Phase 2: AI Adapter Implementation
-- [x] Task: Implement Multi-modal Gemini Adapter (c42f5a9)
-    - [x] Support flexible base_url and API key loading
-    - [x] Implement asynchronous image/text hybrid request method
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: AI Adapter Implementation' (Protocol in workflow.md)
+## Phase 2: AI Strategist Core
+- [ ] Task: Implement AI Strategist Logic
+    - [ ] Implement `decompose_task` with SOTA ADaPT prompts
+    - [ ] Implement `interleave_tasks` for strategic multi-tasking
+    - [ ] Implement `reframe_task` for narrative rewards
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: AI Strategist Core' (Protocol in workflow.md)
