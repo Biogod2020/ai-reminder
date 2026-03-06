@@ -14,8 +14,8 @@
     - [x] Expose endpoint in `core/api.py` to trigger AI-initiated status checks.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Heartbeat - [ ] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Heartbeat & Nudge Logic' (Protocol in workflow.md) Nudge Logic' (Protocol in workflow.md) d32beef
 
-## Phase 3: Delay Handling & Scientific Re-plan
+## Phase 3: Delay Handling ## Phase 3: Delay Handling & Scientific Re-plan Scientific Re-plan [checkpoint: f37cb63]
 - [x] Task: Implement /handle_response and Re-plan logic 7a61d72
     - [x] Logic to process feedback like "I'm exhausted" and re-apply Interleaving to the remaining schedule.
     - [x] Add `slack_minutes` visibility to `/get_view_data`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Delay Handling & Scientific Re-plan' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Delay Handling - [ ] Task: Conductor - User Manual Verification 'Phase 3: Delay Handling & Scientific Re-plan' (Protocol in workflow.md) Scientific Re-plan' (Protocol in workflow.md) f37cb63
