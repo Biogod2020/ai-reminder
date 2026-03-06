@@ -26,8 +26,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Strategic Features - [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Features & Seeding' (Protocol in workflow.md) Seeding' (Protocol in workflow.md) d117508
 
 ## Phase 4: Validation & Tooling
-- [ ] Task: Build CLI End-to-End Tester
-    - [ ] Create `scripts/test_agent.py` to simulate multi-turn chats.
+- [x] Task: Build CLI End-to-End Tester f07c353
+    - [x] Create `scripts/test_agent.py` to simulate multi-turn chats.
 - [ ] Task: Comprehensive Integration Tests
     - [ ] Expand `tests/test_api.py` to cover full persistence and re-planning.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Validation & Tooling' (Protocol in workflow.md)
