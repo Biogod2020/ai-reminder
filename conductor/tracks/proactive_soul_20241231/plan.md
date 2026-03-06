@@ -10,8 +10,8 @@
 - [x] Task: Implement Heartbeat Logic Hub fc3c809
     - [x] Create `_node_evaluate_nudge` in orchestrator to decide if a nudge is timely.
     - [x] Create `core/skills/proactive-nudger/SKILL.md` with scientific reasoning logic.
-- [ ] Task: Implement /heartbeat API endpoint
-    - [ ] Expose endpoint in `core/api.py` to trigger AI-initiated status checks.
+- [x] Task: Implement /heartbeat API endpoint fb213ad
+    - [x] Expose endpoint in `core/api.py` to trigger AI-initiated status checks.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Heartbeat & Nudge Logic' (Protocol in workflow.md)
 
 ## Phase 3: Delay Handling & Scientific Re-plan
