@@ -1,6 +1,7 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
+const http = require('http');
 
 let mainWindow;
 let tray;
@@ -10,13 +11,13 @@ function createWindow() {
     width: 1000,
     height: 800,
     show: false,
-    frame: false, // 无边框
-    transparent: true, // 透明
-    vibrancy: 'sidebar', // macOS 磨砂玻璃效果
+    frame: false, 
+    transparent: true,
+    vibrancy: 'sidebar',
     visualEffectState: 'active',
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false, // 为了简化 MVP 阶段的 IPC
+      contextIsolation: false,
     },
   });
 
@@ -35,19 +36,64 @@ function createWindow() {
   });
 }
 
+function updateTrayMenu() {
+  // Fetch tasks from backend to show in tray
+  http.get('http://127.0.0.1:8000/get_view_data', (res) => {
+    let data = '';
+    res.on('data', (chunk) => data += chunk);
+    res.on('end', () => {
+      try {
+        const json = JSON.parse(data);
+        const tasks = json.calendar || [];
+        
+        const taskItems = tasks.slice(0, 5).map(t => ({
+          label: `[${t.time}] ${t.title} (${(t.load * 100).toFixed(0)}%)`,
+          click: () => {
+            mainWindow.show();
+            mainWindow.webContents.send('navigate', 'Schedule');
+          }
+        }));
+
+        const contextMenu = Menu.buildFromTemplate([
+          { label: 'Notion Soul Agent', enabled: false },
+          { type: 'separator' },
+          ...taskItems,
+          { type: 'separator' },
+          { label: 'Show Dashboard', click: () => mainWindow.show() },
+          { label: 'Quit', click: () => app.quit() }
+        ]);
+        
+        tray.setContextMenu(contextMenu);
+      } catch (e) {
+        setDefaultTray();
+      }
+    });
+  }).on('error', () => {
+    setDefaultTray();
+  });
+}
+
+function setDefaultTray() {
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Notion Soul Agent', enabled: false },
+    { type: 'separator' },
+    { label: 'Backend Offline', enabled: false },
+    { type: 'separator' },
+    { label: 'Show Dashboard', click: () => mainWindow.show() },
+    { label: 'Quit', click: () => app.quit() }
+  ]);
+  tray.setContextMenu(contextMenu);
+}
+
 function createTray() {
-  // 暂时使用一个简单的占位图标
   const icon = nativeImage.createEmpty(); 
   tray = new Tray(icon);
   tray.setToolTip('Notion Soul Agent');
+  setDefaultTray();
   
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'Show Dashboard', click: () => mainWindow.show() },
-    { type: 'separator' },
-    { label: 'Quit', click: () => app.quit() }
-  ]);
-  
-  tray.setContextMenu(contextMenu);
+  // Refresh tray every 1 minute
+  setInterval(updateTrayMenu, 60000);
+  updateTrayMenu();
 }
 
 app.whenReady().then(() => {
