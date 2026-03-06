@@ -46,3 +46,13 @@ async def get_view_data():
     """
     view_data = await orchestrator.get_optimized_view()
     return view_data
+
+@app.post("/heartbeat")
+async def heartbeat():
+    """AI-initiated status check. Evaluates if a nudge is needed.
+
+    Returns:
+        A dictionary containing the nudge decision and message.
+    """
+    result = await orchestrator.evaluate_nudge()
+    return result

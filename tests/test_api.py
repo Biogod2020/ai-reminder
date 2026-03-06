@@ -64,3 +64,17 @@ async def test_api_end_to_end_task_flow(mocker):
     assert view_response.status_code == 200
     calendar = view_response.json()["calendar"]
     assert any("Build a rocket" in item["title"] for item in calendar)
+
+def test_api_heartbeat(mocker):
+    # Mock evaluate_nudge to return a nudge needed status
+    mock_orch = mocker.patch("core.api.orchestrator")
+    mock_orch.evaluate_nudge = mocker.AsyncMock(return_value={
+        "nudge_needed": True,
+        "message": "Task nudge test",
+        "action": "Continue"
+    })
+    
+    response = client.post("/heartbeat")
+    assert response.status_code == 200
+    assert response.json()["nudge_needed"] is True
+    assert response.json()["message"] == "Task nudge test"
