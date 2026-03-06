@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
 from core.models import Base, Task
+from core.notifier import Notifier
 
 class AgentState(TypedDict):
     user_input: str
@@ -13,6 +14,7 @@ class AgentState(TypedDict):
     response: Optional[str]
     proposed_actions: Optional[List[Dict[str, Any]]]
     needs_approval: bool
+    notify_user: bool
 
 class SoulOrchestrator:
     """Orchestrates natural language intents using a LangGraph state machine."""
@@ -20,6 +22,7 @@ class SoulOrchestrator:
     def __init__(self, db_url: str = "sqlite:///notion_soul.db"):
         self.adapter = GeminiAdapter()
         self.memory = SoulMemory()
+        self.notifier = Notifier()
         
         # Database setup
         self.engine = create_engine(db_url)
@@ -38,6 +41,7 @@ class SoulOrchestrator:
         workflow.add_node("handle_planner", self._node_handle_planner)
         workflow.add_node("handle_clarify", self._node_handle_clarify)
         workflow.add_node("await_approval", self._node_await_approval)
+        workflow.add_node("notify", self._node_notify)
 
         # Set entry point
         workflow.set_entry_point("classify")
@@ -54,12 +58,13 @@ class SoulOrchestrator:
             }
         )
 
-        # Handle task and memory might need approval
+        # Handle task and memory might need approval or notification
         workflow.add_edge("handle_task", "await_approval")
-        workflow.add_edge("handle_memory", END) 
+        workflow.add_edge("handle_memory", "notify") 
         workflow.add_edge("handle_planner", "await_approval")
         workflow.add_edge("handle_clarify", END)
         workflow.add_edge("await_approval", END)
+        workflow.add_edge("notify", END)
 
         return workflow.compile()
 
@@ -85,7 +90,7 @@ class SoulOrchestrator:
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
         """Processes memory-related intents using SoulMemory."""
         await self.memory.add_fact(state["user_input"])
-        return {**state, "response": "I've updated your 'Digital Soul' with this information."}
+        return {**state, "response": "I've updated your 'Digital Soul' with this information.", "notify_user": True}
 
     async def _node_handle_planner(self, state: AgentState) -> AgentState:
         return {**state, "response": "Planning logic pending Implementation Phase 3."}
@@ -96,6 +101,12 @@ class SoulOrchestrator:
     async def _node_await_approval(self, state: AgentState) -> AgentState:
         """Node representing the state where the agent is waiting for user confirmation."""
         return {**state, "response": state.get("response", "Waiting for your approval.")}
+
+    async def _node_notify(self, state: AgentState) -> AgentState:
+        """Sends a notification if the state requires it."""
+        if state.get("notify_user"):
+            await self.notifier.send_bark("Digital Soul Updated", state["response"])
+        return state
 
     async def classify_intent(self, user_input: str) -> str:
         """Determines the intent of the user's input."""
@@ -144,6 +155,7 @@ class SoulOrchestrator:
             "history": history or [],
             "response": None,
             "proposed_actions": None,
-            "needs_approval": False
+            "needs_approval": False,
+            "notify_user": False
         }
         return await self.graph.ainvoke(initial_state)
