@@ -38,3 +38,28 @@ def test_create_user_soul(db_session):
     
     retrieved = db_session.query(UserSoul).filter_by(key='habit_preference').first()
     assert retrieved.value == 'morning_person'
+
+from core.adapter import GeminiAdapter
+
+@pytest.mark.asyncio
+async def test_gemini_adapter_init():
+    adapter = GeminiAdapter(api_key='fake-key', base_url='https://custom.api')
+    assert adapter.api_key == 'fake-key'
+    assert adapter.base_url == 'https://custom.api'
+
+@pytest.mark.asyncio
+async def test_gemini_adapter_generate_text(mocker):
+    # Mock the Client
+    mock_client_class = mocker.patch('core.adapter.genai.Client')
+    mock_client = mock_client_class.return_value
+    mock_response = mocker.Mock()
+    mock_response.text = 'Mocked Response'
+    
+    # Mock client.aio.models.generate_content
+    mock_client.aio.models.generate_content = mocker.AsyncMock(return_value=mock_response)
+
+    adapter = GeminiAdapter(api_key='fake-key')
+    response = await adapter.generate_content('Test Prompt')
+    
+    assert response == 'Mocked Response'
+    mock_client.aio.models.generate_content.assert_called_once()
