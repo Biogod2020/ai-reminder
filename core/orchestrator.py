@@ -1,7 +1,10 @@
 from typing import TypedDict, Optional, List, Any, Dict
 from langgraph.graph import StateGraph, END
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
+from core.models import Base, Task
 
 class AgentState(TypedDict):
     user_input: str
@@ -14,9 +17,15 @@ class AgentState(TypedDict):
 class SoulOrchestrator:
     """Orchestrates natural language intents using a LangGraph state machine."""
 
-    def __init__(self):
+    def __init__(self, db_url: str = "sqlite:///notion_soul.db"):
         self.adapter = GeminiAdapter()
         self.memory = SoulMemory()
+        
+        # Database setup
+        self.engine = create_engine(db_url)
+        Base.metadata.create_all(self.engine)
+        self.Session = sessionmaker(bind=self.engine)
+        
         self.graph = self._build_graph()
 
     def _build_graph(self):
@@ -47,7 +56,7 @@ class SoulOrchestrator:
 
         # Handle task and memory might need approval
         workflow.add_edge("handle_task", "await_approval")
-        workflow.add_edge("handle_memory", END) # Memory updates are direct for now
+        workflow.add_edge("handle_memory", END) 
         workflow.add_edge("handle_planner", "await_approval")
         workflow.add_edge("handle_clarify", END)
         workflow.add_edge("await_approval", END)
@@ -96,6 +105,36 @@ class SoulOrchestrator:
         if clean_response in ['task', 'memory', 'planner', 'clarify']:
             return clean_response
         return 'clarify'
+
+    async def get_optimized_view(self) -> Dict[str, Any]:
+        """Fetches tasks and returns a structured view for the dashboard."""
+        with self.Session() as session:
+            stmt = select(Task)
+            tasks = session.execute(stmt).scalars().all()
+            
+            # Simple interleaving placeholder for MVP:
+            # We sort by cognitive load to simulate interleaving (heavy/light/heavy)
+            sorted_tasks = sorted(tasks, key=lambda x: x.cognitive_load_score, reverse=True)
+            
+            calendar_view = []
+            for i, t in enumerate(sorted_tasks):
+                # Fake some times for the MVP calendar
+                hour = 9 + i
+                calendar_view.append({
+                    "id": t.id,
+                    "time": f"{hour:02d}:00",
+                    "title": t.title,
+                    "load": t.cognitive_load_score
+                })
+                
+            return {
+                "calendar": calendar_view,
+                "kanban": {
+                    "todo": [t.title for t in tasks if t.status == 'todo'],
+                    "in_progress": [t.title for t in tasks if t.status == 'in_progress'],
+                    "done": [t.title for t in tasks if t.status == 'done']
+                }
+            }
 
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
         """Executes the orchestrator graph."""

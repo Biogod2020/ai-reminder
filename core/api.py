@@ -24,3 +24,9 @@ async def chat(request: ChatRequest):
         "response": result["response"],
         "proposed_actions": result.get("proposed_actions")
     }
+
+@app.get("/get_view_data")
+async def get_view_data():
+    """Returns structured data for the Flutter dashboard (Calendar/Kanban)."""
+    view_data = await orchestrator.get_optimized_view()
+    return view_data
