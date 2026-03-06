@@ -9,11 +9,11 @@
     - [x] Define intent classification nodes (Memory, Task, Planner, Clarify).
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Chainlit UI & Basic Dispatcher' (Protocol in workflow.md)
 
-## Phase 2: Memory & Task Integration
+## Phase 2: Memory ## Phase 2: Memory & Task Integration Task Integration [checkpoint: 765239b]
 - [x] Task: Integrate Memory Framework (mem0/Letta) 7dda6c0
     - [x] Install and configure `mem0` or `letta` for local use.
     - [x] Implement `SoulMemory` class to bridge the framework with `user_soul.md`.
-- [x] Task: Implement Task Creation - [~] Task: Implement Task Creation & Atomization Action Atomization Action 4c06370
+- [x] Task: Implement Task Creation - [x] Task: Implement Task Creation - [~] Task: Implement Task Creation & Atomization Action Atomization Action 4c06370 Atomization Action 765239b
     - [x] Link the dispatcher to the existing `decompose_task` logic.
     - [x] Create a confirmation card in Chainlit for task approval.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Memory & Task Integration' (Protocol in workflow.md)
