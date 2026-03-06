@@ -33,7 +33,8 @@ class GeminiAdapter:
             api_key=self.api_key,
             http_options=http_options if http_options else None
         )
-        self.model_id = 'gemini-1.5-flash-latest'
+        # Updated to Gemini 3.1 Flash-Lite
+        self.model_id = 'gemini-3.1-flash-lite-preview'
         self.skill_manager = SkillManager(skills_dir)
 
     async def generate_content(self, prompt: str, images: Optional[List[Any]] = None, skill_name: Optional[str] = None) -> str:

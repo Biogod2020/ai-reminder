@@ -1,3 +1,9 @@
+import os
+import sys
+
+# Ensure the project root is in the Python path
+sys.path.append(os.getcwd())
+
 import chainlit as cl
 from core.orchestrator import SoulOrchestrator
 

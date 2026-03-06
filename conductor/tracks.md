@@ -11,5 +11,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Build Universal Soul Console with Chainlit and NL-to-Action Dispatcher**
+- [~] **Track: Build Universal Soul Console with Chainlit and NL-to-Action Dispatcher**
 *Link: [./tracks/universal_console_20241231/](./tracks/universal_console_20241231/)*
