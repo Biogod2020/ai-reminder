@@ -9,10 +9,10 @@
     - [x] Enable transparency and backdrop-blur settings.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Web-Native Scaffolding' (Protocol in workflow.md) 1766be1
 
-## Phase 2: Core Views & Real-time Bridge
+## Phase 2: Core Views ## Phase 2: Core Views & Real-time Bridge Real-time Bridge [checkpoint: 42d1121]
 - [x] Task: Implement Interleaved Calendar Widget 4f02219
     - [x] Fetch and render tasks from `/get_view_data`.
     - [x] Visually differentiate 'Task' and 'Slack' blocks.
 - [x] Task: Implement Chat - [~] Task: Implement Chat & Thought Stream Thought Stream e57d76e
     - [x] Connect to `/chat` and visualize the AI reasoning step-by-step.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Views & Real-time Bridge' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Views - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Views & Real-time Bridge' (Protocol in workflow.md) Real-time Bridge' (Protocol in workflow.md) 42d1121
