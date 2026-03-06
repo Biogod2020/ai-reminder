@@ -1,9 +1,9 @@
 # Implementation Plan: Build Universal Soul Console (MVP)
 
 ## Phase 1: Chainlit UI & Basic Dispatcher
-- [ ] Task: Scaffold Chainlit UI and Multi-modal Input
-    - [ ] Create `ui/console.py` with basic Chainlit setup.
-    - [ ] Implement message history and thought visualization blocks.
+- [x] Task: Scaffold Chainlit UI and Multi-modal Input f17052e
+    - [x] Create `ui/console.py` with basic Chainlit setup.
+    - [x] Implement message history and thought visualization blocks.
 - [ ] Task: Implement NL Intent Dispatcher (LangGraph)
     - [ ] Create `core/orchestrator.py` with a LangGraph state machine.
     - [ ] Define intent classification nodes (Memory, Task, Planner, Clarify).
