@@ -10,9 +10,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Web-Native Scaffolding' (Protocol in workflow.md) 1766be1
 
 ## Phase 2: Core Views & Real-time Bridge
-- [ ] Task: Implement Interleaved Calendar Widget
-    - [ ] Fetch and render tasks from `/get_view_data`.
-    - [ ] Visually differentiate 'Task' and 'Slack' blocks.
+- [x] Task: Implement Interleaved Calendar Widget 4f02219
+    - [x] Fetch and render tasks from `/get_view_data`.
+    - [x] Visually differentiate 'Task' and 'Slack' blocks.
 - [ ] Task: Implement Chat & Thought Stream
     - [ ] Connect to `/chat` and visualize the AI reasoning step-by-step.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Views & Real-time Bridge' (Protocol in workflow.md)
