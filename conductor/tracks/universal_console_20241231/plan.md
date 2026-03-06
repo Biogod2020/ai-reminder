@@ -18,7 +18,7 @@
     - [x] Create a confirmation card in Chainlit for task approval.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Memory & Task Integration' (Protocol in workflow.md)
 
-## Phase 3: Headless API Service (FastAPI Hub)
+## Phase 3: Headless API Service (FastAPI Hub) [checkpoint: 769477f]
 - [x] Task: Scaffold FastAPI Service and Local Hooks 3212767
     - [x] Install `fastapi` and `uvicorn`.
     - [x] Create `core/api.py` to wrap the Orchestrator.
@@ -27,4 +27,4 @@
     - [x] Define `/chat` for Flutter-to-Python communication.
 - [x] Task: Integrate Bark/Mobile Notification Hook b24e2b2
     - [x] Implement a tool node for cross-platform push notifications.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Headless API Service' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Headless API Service' (Protocol in workflow.md) 769477f
