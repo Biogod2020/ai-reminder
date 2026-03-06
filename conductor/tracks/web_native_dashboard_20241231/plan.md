@@ -1,9 +1,9 @@
 # Implementation Plan: Build Web-Native Liquid Dashboard (Track 6)
 
 ## Phase 1: Web-Native Scaffolding
-- [ ] Task: Initialize React + Vite Project
-    - [ ] Run `npm create vite@latest frontend -- --template react-ts`.
-    - [ ] Configure Tailwind CSS for Notion-Minimalist styling.
+- [x] Task: Initialize React + Vite Project 485da9d
+    - [x] Run `npm create vite@latest frontend -- --template react-ts`.
+    - [x] Configure Tailwind CSS for Notion-Minimalist styling.
 - [ ] Task: Integrate Electron Wrapper
     - [ ] Setup basic Electron main process with Tray support.
     - [ ] Enable transparency and backdrop-blur settings.
