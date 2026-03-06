@@ -3,6 +3,7 @@ import pytest
 from core.skills import SkillManager
 from core.memory import MemoryManager
 from core.models import Base, Task
+from core.adapter import GeminiAdapter
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -47,3 +48,22 @@ def test_memory_manager_soul(tmp_path):
     mm.update_memory('User prefers morning work.')
     content = mm.read_memory()
     assert 'User prefers morning work.' in content
+
+@pytest.mark.asyncio
+async def test_gemini_adapter_decompose_task(mocker):
+    mock_client_class = mocker.patch('core.adapter.genai.Client')
+    mock_client = mock_client_class.return_value
+    
+    # Mock AI response with JSON list
+    mock_response = mocker.Mock()
+    mock_response.text = '[{"title": "Subtask 1", "estimated_cognitive_load": 0.3, "pro_tip": "tip"}]'
+    mock_client.aio.models.generate_content = mocker.AsyncMock(return_value=mock_response)
+
+    adapter = GeminiAdapter(api_key='fake-key')
+    subtasks = await adapter.decompose_task('Major Task')
+    
+    assert len(subtasks) == 1
+    assert subtasks[0]['title'] == 'Subtask 1'
+    # Verify system_instruction was passed (from task-atomizer skill)
+    call_kwargs = mock_client.aio.models.generate_content.call_args.kwargs
+    assert 'system_instruction' in call_kwargs['config']

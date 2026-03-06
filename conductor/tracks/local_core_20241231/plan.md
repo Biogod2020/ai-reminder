@@ -9,7 +9,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Native Skill System & Recursive Models' (Protocol in workflow.md)
 
 ## Phase 2: AI Strategist Integration
-- [ ] Task: Implement Skill-based Reasoning in Adapter
+- [~] Task: Implement Skill-based Reasoning in Adapter
     - [ ] Update `GeminiAdapter` to support dynamic skill mounting
     - [ ] Implement `decompose_task` using `task-atomizer` skill
     - [ ] Create `narrative-soul` skill for rewarding micro-feedback
