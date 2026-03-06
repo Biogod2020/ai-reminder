@@ -2,6 +2,7 @@ from typing import TypedDict, Optional, List, Any, Dict
 from langgraph.graph import StateGraph, END
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
+from langfuse import Langfuse
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
 from core.models import Base, Task
@@ -18,17 +19,14 @@ class AgentState(TypedDict):
     notify_user: bool
 
 class SoulOrchestrator:
-    """Orchestrates natural language intents using a LangGraph state machine."""
+    """Orchestrates natural language intents using a LangGraph state machine with observability."""
 
     def __init__(self, db_url: str = "sqlite:///notion_soul.db"):
-        """Initializes the SoulOrchestrator.
-
-        Args:
-            db_url: The database URL for SQLAlchemy.
-        """
+        """Initializes the SoulOrchestrator with tracing and database support."""
         self.adapter = GeminiAdapter()
         self.memory = SoulMemory()
         self.notifier = Notifier()
+        self.langfuse = Langfuse()
         
         # Database setup
         self.engine = create_engine(db_url)
@@ -65,7 +63,7 @@ class SoulOrchestrator:
             }
         )
 
-        # Handle task and memory might need approval or notification
+        # Edges
         workflow.add_edge("handle_task", "await_approval")
         workflow.add_edge("handle_memory", "notify") 
         workflow.add_edge("handle_planner", "await_approval")
@@ -144,12 +142,10 @@ class SoulOrchestrator:
             tasks = session.execute(stmt).scalars().all()
             
             # Simple interleaving placeholder for MVP:
-            # We sort by cognitive load to simulate interleaving (heavy/light/heavy)
             sorted_tasks = sorted(tasks, key=lambda x: x.cognitive_load_score, reverse=True)
             
             calendar_view = []
             for i, t in enumerate(sorted_tasks):
-                # Fake some times for the MVP calendar
                 hour = 9 + i
                 calendar_view.append({
                     "id": t.id,
@@ -168,7 +164,7 @@ class SoulOrchestrator:
             }
 
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
-        """Executes the orchestrator graph.
+        """Executes the orchestrator graph with Langfuse tracing.
 
         Args:
             user_input: The raw string input from the user.
@@ -177,6 +173,12 @@ class SoulOrchestrator:
         Returns:
             The final AgentState after execution.
         """
+        # Create a trace in Langfuse
+        trace = self.langfuse.trace(
+            name="Orchestrator Run",
+            input={"user_input": user_input, "history": history}
+        )
+        
         initial_state: AgentState = {
             "user_input": user_input,
             "intent": None,
@@ -186,4 +188,11 @@ class SoulOrchestrator:
             "needs_approval": False,
             "notify_user": False
         }
-        return await self.graph.ainvoke(initial_state)
+        
+        # Execute the graph
+        final_state = await self.graph.ainvoke(initial_state)
+        
+        # Update trace with output
+        trace.update(output={"intent": final_state["intent"], "response": final_state["response"]})
+        
+        return final_state
