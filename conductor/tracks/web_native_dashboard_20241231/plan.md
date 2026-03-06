@@ -17,11 +17,11 @@
     - [x] Connect to `/chat` and visualize the AI reasoning step-by-step.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Views & Real-time Bridge' (Protocol in workflow.md) 42d1121
 
-## Phase 3: System Integration & Polish
+## Phase 3: System Integration ## Phase 3: System Integration & Polish Polish [checkpoint: d5a606c]
 - [x] Task: Implement macOS Menu Bar - [~] Task: Implement macOS Menu Bar & System Tray System Tray 492ae8a
     - [x] Permanent icon with a 'Quick Task' summary menu.
 - [x] Task: Integrate Cognitive Metrics Visualization 72c0aac
     - [x] Add charts for CLT/UMP energy peaks (using `fl_chart` or similar).
 - [x] Task: Final Polish - [~] Task: Final Polish & Interaction refinement Interaction refinement 979048b
     - [x] Ensure smooth transitions and hover effects.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: System Integration & Polish' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: System Integration - [ ] Task: Conductor - User Manual Verification 'Phase 3: System Integration & Polish' (Protocol in workflow.md) Polish' (Protocol in workflow.md) d5a606c
