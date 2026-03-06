@@ -1,14 +1,16 @@
 # Implementation Plan: Build AI-Native Core & Soul Memory
 
-## Phase 1: Recursive Schema & Memory Manager
-- [ ] Task: Update Models & Implement Memory Manager
-    - [ ] Update Task model to support recursive parent_id
-    - [ ] Create MemoryManager class for `user_soul.md` operations
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Recursive Schema & Memory Manager' (Protocol in workflow.md)
+## Phase 1: Native Skill System & Recursive Models
+- [ ] Task: Initialize Skill Architecture & Update Models
+    - [ ] Create `core/skills/` directory and define `SkillManager`
+    - [ ] Implement initial `task-atomizer/SKILL.md` with ADaPT protocol
+    - [ ] Update `Task` model in `core/models.py` to support `parent_id` (recursive)
+    - [ ] Implement `MemoryManager` for `user_soul.md`
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Native Skill System & Recursive Models' (Protocol in workflow.md)
 
-## Phase 2: AI Strategist Core
-- [ ] Task: Implement AI Strategist Logic
-    - [ ] Implement `decompose_task` with SOTA ADaPT prompts
-    - [ ] Implement `interleave_tasks` for strategic multi-tasking
-    - [ ] Implement `reframe_task` for narrative rewards
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: AI Strategist Core' (Protocol in workflow.md)
+## Phase 2: AI Strategist Integration
+- [ ] Task: Implement Skill-based Reasoning in Adapter
+    - [ ] Update `GeminiAdapter` to support dynamic skill mounting
+    - [ ] Implement `decompose_task` using `task-atomizer` skill
+    - [ ] Create `narrative-soul` skill for rewarding micro-feedback
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: AI Strategist Integration' (Protocol in workflow.md)
