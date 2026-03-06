@@ -25,6 +25,6 @@
 - [x] Task: Implement Structured Dashboard Endpoints e1a804a
     - [x] Define `/get_view_data` to return interleaved calendar/kanban JSON.
     - [x] Define `/chat` for Flutter-to-Python communication.
-- [ ] Task: Integrate Bark/Mobile Notification Hook
-    - [ ] Implement a tool node for cross-platform push notifications.
+- [x] Task: Integrate Bark/Mobile Notification Hook b24e2b2
+    - [x] Implement a tool node for cross-platform push notifications.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Headless API Service' (Protocol in workflow.md)
