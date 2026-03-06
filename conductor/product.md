@@ -27,7 +27,7 @@ Notion-Soul-Agent (NSA) 是一个**本地优先 (Local-First)**、具备“生�
 - **智慧任务原子化 (Strategic Task Atomization):**
     - **专家视角拆解：** 当用户输入复杂任务时，Gemini 依据 SOTA 标准（如 **ADaPT** 协议）从专业人士视角将其拆解为低阻力的“原子任务”。
     - **诱导式完成：** 每次仅推送一个原子任务，并附带专业提示（例如：“现在的目标仅是写出 200 字的大纲”），降低启动门槛。
-- **穿插式智能排程 (Strategic Interleaving):**
+- **穿称式智能排程 (Strategic Interleaving):**
     - **多任务穿插：** 放弃传统的单一任务阻塞模式。Gemini 会在重度科研与轻度行政任务间进行科学穿插，利用“交替练习效应”防止认知疲劳。
     - **LLM 动态排程：** AI 综合用户的“记忆文档”与当前任务状态，推理出最优的任务穿插顺序。
 - **多模态澄清闭环 (Clarification Loop):** 
@@ -47,7 +47,7 @@ Notion-Soul-Agent (NSA) 是一个**本地优先 (Local-First)**、具备“生�
     - **桌面感知模块：** 根据当前屏幕内容动态调整穿插优先级。
 - **系统级融合 (Full System):**
     - **App Intents:** 允许 Siri 驱动 Agent。
-    - **Liquid Glass UI:** 高度定制化的 SwiftUI 原生悬浮面板。
+    - **Liquid Glass UI:** 高度定制化的 **Electron/Capacitor** 跨端悬浮面板。
 
 ## 5. 核心价值：智慧自动化 (Intelligent Automation)
 NSA 不只是一个提醒器，而是一个“数字 CEO”。它在后台默默处理任务拆解、排程优化与多端同步，让用户拥有一个响应极速、具备专业智慧的本地智能核心。
