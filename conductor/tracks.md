@@ -7,6 +7,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Research SOTA materials and refine the core agent architecture**
   *Link: [./tracks/research_sota_20241231/](./tracks/research_sota_20241231/)*
 
-- [~] **Track: Build AI-Native Core & Soul Memory (Task Atomization & Soul Context)**
+- [x] **Track: Build AI-Native Core & Soul Memory (Task Atomization & Soul Context)**
   *Link: [./tracks/local_core_20241231/](./tracks/local_core_20241231/)*
 
