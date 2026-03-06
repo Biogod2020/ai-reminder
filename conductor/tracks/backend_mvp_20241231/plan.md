@@ -4,9 +4,9 @@
 - [x] Task: Implement API Proxy - [~] Task: Implement API Proxy & Authentication Authentication a4e7816
     - [x] Update `GeminiAdapter` to support local proxy switch and password auth.
     - [x] Add `USE_LOCAL_PROXY` and `PROXY_PASSWORD` to `.env`.
-- [ ] Task: Integrate Langfuse Tracing
-    - [ ] Install `langfuse` and configure in `orchestrator.py`.
-    - [ ] Add tracing decorators/calls to LangGraph nodes.
+- [x] Task: Integrate Langfuse Tracing e975465
+    - [x] Install `langfuse` and configure in `orchestrator.py`.
+    - [x] Add tracing decorators/calls to LangGraph nodes.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: API Optimization & Observability' (Protocol in workflow.md)
 
 ## Phase 2: Persistence & Recursive Logic (ADaPT)
