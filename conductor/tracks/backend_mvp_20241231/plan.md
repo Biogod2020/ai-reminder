@@ -13,8 +13,8 @@
 - [x] Task: Implement Task Tree Persistence d9c16c0
     - [x] Replace placeholders in `_node_handle_task` with real SQLAlchemy commits.
     - [x] Ensure ADaPT sub-tasks are correctly linked via `parent_id`.
-- [ ] Task: Implement Memory & Action Persistence
-    - [ ] Implement actual write-back for `handle_memory` and user approvals.
+- [x] Task: Implement Memory - [~] Task: Implement Memory & Action Persistence Action Persistence d1f7a7e
+    - [x] Implement actual write-back for `handle_memory` and user approvals.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistence & Recursive Logic' (Protocol in workflow.md)
 
 ## Phase 3: Strategic Features & Seeding
