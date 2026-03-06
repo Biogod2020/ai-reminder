@@ -28,6 +28,6 @@
 ## Phase 4: Validation & Tooling
 - [x] Task: Build CLI End-to-End Tester f07c353
     - [x] Create `scripts/test_agent.py` to simulate multi-turn chats.
-- [ ] Task: Comprehensive Integration Tests
-    - [ ] Expand `tests/test_api.py` to cover full persistence and re-planning.
+- [x] Task: Comprehensive Integration Tests 1b988d4
+    - [x] Expand `tests/test_api.py` to cover full persistence and re-planning.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Validation & Tooling' (Protocol in workflow.md)
