@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Calendar } from './components/Calendar'
 import { Chat } from './components/Chat'
+import { CognitiveMetrics } from './components/CognitiveMetrics'
 import { LayoutDashboard, Calendar as CalendarIcon, Kanban, BrainCircuit, Settings, MessageSquare } from 'lucide-react'
 import { cn } from './lib/utils'
 
@@ -57,10 +58,11 @@ function App() {
         <div className="absolute inset-0 overflow-y-auto">
           {activeTab === 'Schedule' && <Calendar />}
           {activeTab === 'Console' && <Chat />}
-          {['Overview', 'Kanban', 'Cognitive'].includes(activeTab) && (
+          {activeTab === 'Cognitive' && <CognitiveMetrics />}
+          {['Overview', 'Kanban'].includes(activeTab) && (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <BrainCircuit className="w-12 h-12 mb-4 opacity-20" />
-              <p className="text-sm font-medium">Coming soon in Phase 2/3...</p>
+              <p className="text-sm font-medium">Coming soon in Phase 3...</p>
             </div>
           )}
         </div>
