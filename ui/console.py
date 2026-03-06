@@ -16,11 +16,7 @@ async def start():
 
 @cl.on_message
 async def main(message: cl.Message):
-    """Handles incoming user messages and visualizes the reasoning process.
-
-    Args:
-        message: The incoming Chainlit message object.
-    """
+    """Handles incoming user messages and visualizes the reasoning process."""
     message_history = cl.user_session.get("message_history")
     orchestrator = cl.user_session.get("orchestrator")
     
@@ -31,6 +27,9 @@ async def main(message: cl.Message):
         # Execute the orchestrator
         result = await orchestrator.run(message.content, history=message_history)
         step.output = f"Intent classified as: {result['intent']}"
+
+    # Store current task title for callback
+    cl.user_session.set("last_task_title", message.content)
 
     # If the agent has proposed actions (e.g. sub-tasks), show a confirmation card
     if result.get("proposed_actions"):
@@ -58,19 +57,15 @@ async def main(message: cl.Message):
 
 @cl.action_callback("approve_plan")
 async def on_approve(action: cl.Action):
-    """Callback for plan approval.
-
-    Args:
-        action: The Chainlit action object that triggered the callback.
-    """
-    await cl.Message(content="Plan approved! I'll commit these steps to your local database (Implementation pending Track 4).").send()
-    # Logic to persist tasks to SQLite would go here
+    """Callback for plan approval. Persists the plan to SQLite."""
+    orchestrator = cl.user_session.get("orchestrator")
+    task_title = cl.user_session.get("last_task_title")
+    
+    await orchestrator.approve_plan(task_title)
+    
+    await cl.Message(content=f"Plan for '{task_title}' approved and committed to your local database!").send()
 
 @cl.action_callback("decline_plan")
 async def on_decline(action: cl.Action):
-    """Callback for plan rejection.
-
-    Args:
-        action: The Chainlit action object that triggered the callback.
-    """
+    """Callback for plan rejection."""
     await cl.Message(content="Plan declined. Feel free to rephrase or give more specific instructions.").send()

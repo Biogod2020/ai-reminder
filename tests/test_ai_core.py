@@ -84,3 +84,27 @@ async def test_orchestrator_persistence_task(orchestrator, mocker):
         titles = [c.title for c in children]
         assert "Subtask A" in titles
         assert "Subtask B" in titles
+
+@pytest.mark.asyncio
+async def test_orchestrator_approve_plan(orchestrator, mocker):
+    # 1. Manually seed a pending task tree
+    with orchestrator.Session() as session:
+        parent = Task(title='Approve Me', status='todo', sync_status='pending')
+        session.add(parent)
+        session.flush()
+        child = Task(title='Subtask X', parent_id=parent.id, sync_status='pending')
+        session.add(child)
+        session.commit()
+
+    # 2. Approve it
+    await orchestrator.approve_plan('Approve Me')
+
+    # 3. Verify status in DB
+    with orchestrator.Session() as session:
+        stmt = select(Task).where(Task.title == 'Approve Me')
+        p = session.execute(stmt).scalar_one()
+        assert p.sync_status == 'approved'
+        
+        stmt_c = select(Task).where(Task.parent_id == p.id)
+        c = session.execute(stmt_c).scalar_one()
+        assert c.sync_status == 'approved'

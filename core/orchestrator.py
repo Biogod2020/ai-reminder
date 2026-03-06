@@ -1,11 +1,11 @@
 from typing import TypedDict, Optional, List, Any, Dict
 from langgraph.graph import StateGraph, END
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import sessionmaker
 from langfuse import Langfuse
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
-from core.models import Base, Task
+from core.models import Base, Task, UserSoul
 from core.notifier import Notifier
 
 class AgentState(TypedDict):
@@ -116,8 +116,22 @@ class SoulOrchestrator:
         }
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
-        """Processes memory-related intents using SoulMemory."""
+        """Processes memory-related intents using SoulMemory and persists to UserSoul table."""
+        # 1. Update Markdown Soul Context
         await self.memory.add_fact(state["user_input"])
+        
+        # 2. Persist to UserSoul Table for structured query support
+        with self.Session() as session:
+            # For MVP, we extract a key using Gemini or just use a generic one
+            # Here we'll just store the raw fact as a 'preference'
+            soul_record = UserSoul(
+                key=f"fact_{datetime.now().timestamp()}",
+                value=state["user_input"],
+                category="preference"
+            )
+            session.add(soul_record)
+            session.commit()
+
         return {**state, "response": "I've updated your 'Digital Soul' with this information.", "notify_user": True}
 
     async def _node_handle_planner(self, state: AgentState) -> AgentState:
@@ -137,6 +151,24 @@ class SoulOrchestrator:
         if state.get("notify_user"):
             await self.notifier.send_bark("Digital Soul Updated", state["response"])
         return state
+
+    async def approve_plan(self, task_title: str):
+        """Action: User approves a proposed task tree. Updates status to 'synced'."""
+        with self.Session() as session:
+            # Update parent
+            stmt = update(Task).where(Task.title == task_title).values(sync_status='approved')
+            session.execute(stmt)
+            
+            # Update children (subtasks)
+            # Find parent ID
+            parent_stmt = select(Task.id).where(Task.title == task_title)
+            parent_id = session.execute(parent_stmt).scalar_one_or_none()
+            
+            if parent_id:
+                child_stmt = update(Task).where(Task.parent_id == parent_id).values(sync_status='approved')
+                session.execute(child_stmt)
+            
+            session.commit()
 
     async def classify_intent(self, user_input: str) -> str:
         """Determines the intent of the user's input."""
@@ -177,7 +209,6 @@ class SoulOrchestrator:
 
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
         """Executes the orchestrator graph with Langfuse tracing."""
-        # Safety check for langfuse client initialization
         trace = None
         try:
             trace = self.langfuse.trace(
@@ -197,10 +228,8 @@ class SoulOrchestrator:
             "notify_user": False
         }
         
-        # Execute the graph
         final_state = await self.graph.ainvoke(initial_state)
         
-        # Update trace with output
         if trace:
             trace.update(output={"intent": final_state["intent"], "response": final_state["response"]})
         
