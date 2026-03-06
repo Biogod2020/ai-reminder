@@ -9,13 +9,13 @@
     - [x] Add tracing decorators/calls to LangGraph nodes.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: API Optimization - [ ] Task: Conductor - User Manual Verification 'Phase 1: API Optimization & Observability' (Protocol in workflow.md) Observability' (Protocol in workflow.md) e2d7611
 
-## Phase 2: Persistence & Recursive Logic (ADaPT)
+## Phase 2: Persistence ## Phase 2: Persistence & Recursive Logic (ADaPT) Recursive Logic (ADaPT) [checkpoint: 3866728]
 - [x] Task: Implement Task Tree Persistence d9c16c0
     - [x] Replace placeholders in `_node_handle_task` with real SQLAlchemy commits.
     - [x] Ensure ADaPT sub-tasks are correctly linked via `parent_id`.
 - [x] Task: Implement Memory - [~] Task: Implement Memory & Action Persistence Action Persistence d1f7a7e
     - [x] Implement actual write-back for `handle_memory` and user approvals.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistence & Recursive Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Persistence - [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistence & Recursive Logic' (Protocol in workflow.md) Recursive Logic' (Protocol in workflow.md) 3866728
 
 ## Phase 3: Strategic Features & Seeding
 - [ ] Task: Implement Interleaving Algorithm
