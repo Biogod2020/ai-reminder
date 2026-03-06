@@ -1,5 +1,6 @@
 from typing import TypedDict, Optional, List, Any, Dict
-from datetime import datetime
+from datetime import datetime, timezone
+import json
 from langgraph.graph import StateGraph, END
 from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import sessionmaker
@@ -102,6 +103,8 @@ class SoulOrchestrator:
                     title=st.get("title", "Untitled Subtask"),
                     parent_id=new_parent.id,
                     cognitive_load_score=st.get("estimated_cognitive_load", 0.0),
+                    duration_minutes=st.get("duration_minutes", 20),
+                    slack_minutes=st.get("slack_minutes", 5),
                     status='todo',
                     sync_status='pending'
                 )
@@ -122,7 +125,7 @@ class SoulOrchestrator:
         
         with self.Session() as session:
             soul_record = UserSoul(
-                key=f"fact_{datetime.now().timestamp()}",
+                key=f"fact_{datetime.now(timezone.utc).timestamp()}",
                 value=state["user_input"],
                 category="preference"
             )
@@ -170,17 +173,45 @@ class SoulOrchestrator:
             return clean_response
         return 'clarify'
 
+    async def evaluate_nudge(self) -> Dict[str, Any]:
+        """Heartbeat Logic: Evaluates current active tasks and decides if a nudge is needed."""
+        with self.Session() as session:
+            stmt = select(Task).where(Task.status == 'in_progress').order_by(Task.updated_at.desc())
+            active_task = session.execute(stmt).scalars().first()
+            
+            if not active_task:
+                return {"nudge_needed": False}
+            
+            # Use proactive-nudger skill to decide
+            prompt = f"Active Task: '{active_task.title}'. Started at: {active_task.created_at}. Expected Duration: {active_task.duration_minutes}m. Slack: {active_task.slack_minutes}m.\n\nPlease decide if a nudge is needed."
+            
+            response_text = await self.adapter.generate_content(prompt, skill_name='proactive-nudger')
+            
+            # Clean JSON
+            clean_json = response_text.strip()
+            if "```json" in clean_json:
+                clean_json = clean_json.split("```json")[1].split("```")[0].strip()
+            
+            try:
+                data = json.loads(clean_json)
+                return {
+                    "nudge_needed": True,
+                    "message": data.get("nudge_message", "How is the task going?"),
+                    "action": data.get("suggested_action", "Continue"),
+                    "task_id": active_task.id
+                }
+            except Exception:
+                return {"nudge_needed": False, "error": "AI response parsing failed"}
+
     async def get_optimized_view(self) -> Dict[str, Any]:
         """Fetches tasks and returns a scientifically interleaved view for the dashboard."""
         with self.Session() as session:
-            stmt = select(Task).where(Task.parent_id == None) # Get main tasks or atomized ones
+            stmt = select(Task).where(Task.parent_id == None) 
             tasks = session.execute(stmt).scalars().all()
             
-            # SOTA Interleaving Logic: Alternate High/Low cognitive load
             heavy_tasks = [t for t in tasks if t.cognitive_load_score >= 0.5]
             light_tasks = [t for t in tasks if t.cognitive_load_score < 0.5]
             
-            # Sort each by score to maintain importance within category
             heavy_tasks.sort(key=lambda x: x.cognitive_load_score, reverse=True)
             light_tasks.sort(key=lambda x: x.cognitive_load_score, reverse=True)
             
@@ -198,7 +229,9 @@ class SoulOrchestrator:
                     "id": t.id,
                     "time": f"{hour:02d}:00",
                     "title": t.title,
-                    "load": t.cognitive_load_score
+                    "load": t.cognitive_load_score,
+                    "duration": t.duration_minutes,
+                    "slack": t.slack_minutes
                 })
                 
             return {
