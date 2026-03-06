@@ -7,17 +7,29 @@ app = FastAPI(title="Notion-Soul-Agent API Hub")
 orchestrator = SoulOrchestrator()
 
 class ChatRequest(BaseModel):
+    """Data model for a chat request."""
     message: str
     history: Optional[List[dict]] = None
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint.
+
+    Returns:
+        A dictionary indicating the service status.
+    """
     return {"status": "ok"}
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    """Processes natural language input and returns structured intent/response."""
+    """Processes natural language input and returns structured intent/response.
+
+    Args:
+        request: The ChatRequest containing the user message and history.
+
+    Returns:
+        A dictionary with the classified intent, agent response, and any proposed actions.
+    """
     result = await orchestrator.run(request.message, history=request.history)
     return {
         "intent": result["intent"],
@@ -27,6 +39,10 @@ async def chat(request: ChatRequest):
 
 @app.get("/get_view_data")
 async def get_view_data():
-    """Returns structured data for the Flutter dashboard (Calendar/Kanban)."""
+    """Returns structured data for the Flutter dashboard (Calendar/Kanban).
+
+    Returns:
+        A dictionary containing interleaved calendar tasks and kanban board data.
+    """
     view_data = await orchestrator.get_optimized_view()
     return view_data

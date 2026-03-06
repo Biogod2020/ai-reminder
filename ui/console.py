@@ -9,14 +9,18 @@ from core.orchestrator import SoulOrchestrator
 
 @cl.on_chat_start
 async def start():
-    """Initializes the chat session and message history."""
+    """Initializes the chat session, message history, and orchestrator."""
     cl.user_session.set("message_history", [])
     cl.user_session.set("orchestrator", SoulOrchestrator())
     await cl.Message(content="Welcome to the Universal Soul Console. How can I help you today?").send()
 
 @cl.on_message
 async def main(message: cl.Message):
-    """Handles incoming user messages and visualizes the reasoning process."""
+    """Handles incoming user messages and visualizes the reasoning process.
+
+    Args:
+        message: The incoming Chainlit message object.
+    """
     message_history = cl.user_session.get("message_history")
     orchestrator = cl.user_session.get("orchestrator")
     
@@ -54,11 +58,19 @@ async def main(message: cl.Message):
 
 @cl.action_callback("approve_plan")
 async def on_approve(action: cl.Action):
-    """Callback for plan approval."""
+    """Callback for plan approval.
+
+    Args:
+        action: The Chainlit action object that triggered the callback.
+    """
     await cl.Message(content="Plan approved! I'll commit these steps to your local database (Implementation pending Track 4).").send()
     # Logic to persist tasks to SQLite would go here
 
 @cl.action_callback("decline_plan")
 async def on_decline(action: cl.Action):
-    """Callback for plan rejection."""
+    """Callback for plan rejection.
+
+    Args:
+        action: The Chainlit action object that triggered the callback.
+    """
     await cl.Message(content="Plan declined. Feel free to rephrase or give more specific instructions.").send()

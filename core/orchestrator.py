@@ -8,6 +8,7 @@ from core.models import Base, Task
 from core.notifier import Notifier
 
 class AgentState(TypedDict):
+    """The state of the agent within the orchestrator graph."""
     user_input: str
     intent: Optional[str]
     history: List[dict]
@@ -20,6 +21,11 @@ class SoulOrchestrator:
     """Orchestrates natural language intents using a LangGraph state machine."""
 
     def __init__(self, db_url: str = "sqlite:///notion_soul.db"):
+        """Initializes the SoulOrchestrator.
+
+        Args:
+            db_url: The database URL for SQLAlchemy.
+        """
         self.adapter = GeminiAdapter()
         self.memory = SoulMemory()
         self.notifier = Notifier()
@@ -32,6 +38,7 @@ class SoulOrchestrator:
         self.graph = self._build_graph()
 
     def _build_graph(self):
+        """Constructs the LangGraph state machine."""
         workflow = StateGraph(AgentState)
 
         # Define nodes
@@ -69,16 +76,16 @@ class SoulOrchestrator:
         return workflow.compile()
 
     async def _node_classify(self, state: AgentState) -> AgentState:
-        """Classifies the user's intent."""
+        """Node: Classifies the user's intent."""
         intent = await self.classify_intent(state["user_input"])
         return {**state, "intent": intent}
 
     def _route_intent(self, state: AgentState) -> str:
-        """Routes to the appropriate node based on intent."""
+        """Conditional Edge: Routes to the appropriate node based on intent."""
         return state["intent"] or "clarify"
 
     async def _node_handle_task(self, state: AgentState) -> AgentState:
-        """Decomposes a task and proposes actions."""
+        """Node: Decomposes a task and proposes actions."""
         subtasks = await self.adapter.decompose_task(state["user_input"])
         return {
             **state, 
@@ -88,28 +95,37 @@ class SoulOrchestrator:
         }
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
-        """Processes memory-related intents using SoulMemory."""
+        """Node: Processes memory-related intents using SoulMemory."""
         await self.memory.add_fact(state["user_input"])
         return {**state, "response": "I've updated your 'Digital Soul' with this information.", "notify_user": True}
 
     async def _node_handle_planner(self, state: AgentState) -> AgentState:
+        """Node: Handles macro planning requests."""
         return {**state, "response": "Planning logic pending Implementation Phase 3."}
 
     async def _node_handle_clarify(self, state: AgentState) -> AgentState:
+        """Node: Requests clarification for ambiguous input."""
         return {**state, "response": "I'm not quite sure what you mean. Could you provide more details?"}
 
     async def _node_await_approval(self, state: AgentState) -> AgentState:
-        """Node representing the state where the agent is waiting for user confirmation."""
+        """Node: Represents the state where the agent is waiting for user confirmation."""
         return {**state, "response": state.get("response", "Waiting for your approval.")}
 
     async def _node_notify(self, state: AgentState) -> AgentState:
-        """Sends a notification if the state requires it."""
+        """Node: Sends a notification if the state requires it."""
         if state.get("notify_user"):
             await self.notifier.send_bark("Digital Soul Updated", state["response"])
         return state
 
     async def classify_intent(self, user_input: str) -> str:
-        """Determines the intent of the user's input."""
+        """Determines the intent of the user's input.
+
+        Args:
+            user_input: The raw string input from the user.
+
+        Returns:
+            The intent category (task, memory, planner, clarify).
+        """
         prompt = f"Classify the following user input into one of these categories: 'task', 'memory', 'planner', 'clarify'.\n\nInput: {user_input}\n\nOutput only the category name."
         response = await self.adapter.generate_content(prompt)
         clean_response = response.strip().lower()
@@ -118,7 +134,11 @@ class SoulOrchestrator:
         return 'clarify'
 
     async def get_optimized_view(self) -> Dict[str, Any]:
-        """Fetches tasks and returns a structured view for the dashboard."""
+        """Fetches tasks and returns a structured view for the dashboard.
+
+        Returns:
+            A dictionary containing calendar and kanban formatted data.
+        """
         with self.Session() as session:
             stmt = select(Task)
             tasks = session.execute(stmt).scalars().all()
@@ -148,7 +168,15 @@ class SoulOrchestrator:
             }
 
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
-        """Executes the orchestrator graph."""
+        """Executes the orchestrator graph.
+
+        Args:
+            user_input: The raw string input from the user.
+            history: Optional list of previous message turns.
+
+        Returns:
+            The final AgentState after execution.
+        """
         initial_state: AgentState = {
             "user_input": user_input,
             "intent": None,
