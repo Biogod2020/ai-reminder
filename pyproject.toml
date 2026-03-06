@@ -9,6 +9,7 @@ dependencies = [
     "google-genai>=1.66.0",
     "google-generativeai>=0.8.6",
     "langgraph>=1.0.10",
+    "mem0ai>=1.0.5",
     "notion-client>=3.0.0",
     "pydantic>=2.12.5",
     "pytest>=9.0.2",
