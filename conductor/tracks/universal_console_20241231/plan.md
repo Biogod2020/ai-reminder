@@ -22,9 +22,9 @@
 - [x] Task: Scaffold FastAPI Service and Local Hooks 3212767
     - [x] Install `fastapi` and `uvicorn`.
     - [x] Create `core/api.py` to wrap the Orchestrator.
-- [ ] Task: Implement Structured Dashboard Endpoints
-    - [ ] Define `/get_view_data` to return interleaved calendar/kanban JSON.
-    - [ ] Define `/chat` for Flutter-to-Python communication.
+- [x] Task: Implement Structured Dashboard Endpoints e1a804a
+    - [x] Define `/get_view_data` to return interleaved calendar/kanban JSON.
+    - [x] Define `/chat` for Flutter-to-Python communication.
 - [ ] Task: Integrate Bark/Mobile Notification Hook
     - [ ] Implement a tool node for cross-platform push notifications.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Headless API Service' (Protocol in workflow.md)
