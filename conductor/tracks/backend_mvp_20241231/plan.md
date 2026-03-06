@@ -21,8 +21,8 @@
 - [x] Task: Implement Interleaving Algorithm 888a9b4
     - [x] Logic to sequence tasks by alternating cognitive loads.
     - [x] Update `get_optimized_view` to use this scientific ordering.
-- [ ] Task: Create Data Seeding Script
-    - [ ] Script to populate `notion_soul.db` with diverse sample tasks.
+- [x] Task: Create Data Seeding Script 8167d14
+    - [x] Script to populate `notion_soul.db` with diverse sample tasks.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Features & Seeding' (Protocol in workflow.md)
 
 ## Phase 4: Validation & Tooling
