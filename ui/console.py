@@ -26,10 +26,39 @@ async def main(message: cl.Message):
         step.input = message.content
         # Execute the orchestrator
         result = await orchestrator.run(message.content, history=message_history)
-        step.output = f"Intent classified as: {result['intent']}\nResponse: {result['response']}"
+        step.output = f"Intent classified as: {result['intent']}"
 
-    msg = cl.Message(content=result["response"])
-    await msg.send()
-    
-    message_history.append({"role": "assistant", "content": msg.content})
+    # If the agent has proposed actions (e.g. sub-tasks), show a confirmation card
+    if result.get("proposed_actions"):
+        actions = [
+            cl.Action(name="approve_plan", value="approve", label="Approve Plan"),
+            cl.Action(name="decline_plan", value="decline", label="Decline")
+        ]
+        
+        content = f"### Proposed Plan for: {message.content}\n\n"
+        for i, subtask in enumerate(result["proposed_actions"]):
+            title = subtask.get("title", "Untitled")
+            load = subtask.get("estimated_cognitive_load", "N/A")
+            content += f"{i+1}. **{title}** (Load: {load})\n"
+            if subtask.get("pro_tip"):
+                content += f"   - *Pro-tip:* {subtask['pro_tip']}\n"
+        
+        await cl.Message(content=content, actions=actions).send()
+    else:
+        # Standard text response
+        msg = cl.Message(content=result["response"])
+        await msg.send()
+        message_history.append({"role": "assistant", "content": msg.content})
+
     cl.user_session.set("message_history", message_history)
+
+@cl.action_callback("approve_plan")
+async def on_approve(action: cl.Action):
+    """Callback for plan approval."""
+    await cl.Message(content="Plan approved! I'll commit these steps to your local database (Implementation pending Track 4).").send()
+    # Logic to persist tasks to SQLite would go here
+
+@cl.action_callback("decline_plan")
+async def on_decline(action: cl.Action):
+    """Callback for plan rejection."""
+    await cl.Message(content="Plan declined. Feel free to rephrase or give more specific instructions.").send()

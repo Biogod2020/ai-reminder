@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional, List
+from typing import TypedDict, Optional, List, Any, Dict
 from langgraph.graph import StateGraph, END
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
@@ -8,6 +8,8 @@ class AgentState(TypedDict):
     intent: Optional[str]
     history: List[dict]
     response: Optional[str]
+    proposed_actions: Optional[List[Dict[str, Any]]]
+    needs_approval: bool
 
 class SoulOrchestrator:
     """Orchestrates natural language intents using a LangGraph state machine."""
@@ -26,6 +28,7 @@ class SoulOrchestrator:
         workflow.add_node("handle_memory", self._node_handle_memory)
         workflow.add_node("handle_planner", self._node_handle_planner)
         workflow.add_node("handle_clarify", self._node_handle_clarify)
+        workflow.add_node("await_approval", self._node_await_approval)
 
         # Set entry point
         workflow.set_entry_point("classify")
@@ -42,11 +45,12 @@ class SoulOrchestrator:
             }
         )
 
-        # Connect handlers to END
-        workflow.add_edge("handle_task", END)
-        workflow.add_edge("handle_memory", END)
-        workflow.add_edge("handle_planner", END)
+        # Handle task and memory might need approval
+        workflow.add_edge("handle_task", "await_approval")
+        workflow.add_edge("handle_memory", END) # Memory updates are direct for now
+        workflow.add_edge("handle_planner", "await_approval")
         workflow.add_edge("handle_clarify", END)
+        workflow.add_edge("await_approval", END)
 
         return workflow.compile()
 
@@ -60,7 +64,14 @@ class SoulOrchestrator:
         return state["intent"] or "clarify"
 
     async def _node_handle_task(self, state: AgentState) -> AgentState:
-        return {**state, "response": "Handling task..."}
+        """Decomposes a task and proposes actions."""
+        subtasks = await self.adapter.decompose_task(state["user_input"])
+        return {
+            **state, 
+            "proposed_actions": subtasks, 
+            "needs_approval": True,
+            "response": f"I've broken down '{state['user_input']}' into {len(subtasks)} atomic steps. Please approve the plan."
+        }
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
         """Processes memory-related intents using SoulMemory."""
@@ -68,10 +79,14 @@ class SoulOrchestrator:
         return {**state, "response": "I've updated your 'Digital Soul' with this information."}
 
     async def _node_handle_planner(self, state: AgentState) -> AgentState:
-        return {**state, "response": "Handling planning..."}
+        return {**state, "response": "Planning logic pending Implementation Phase 3."}
 
     async def _node_handle_clarify(self, state: AgentState) -> AgentState:
-        return {**state, "response": "Need more info."}
+        return {**state, "response": "I'm not quite sure what you mean. Could you provide more details?"}
+
+    async def _node_await_approval(self, state: AgentState) -> AgentState:
+        """Node representing the state where the agent is waiting for user confirmation."""
+        return {**state, "response": state.get("response", "Waiting for your approval.")}
 
     async def classify_intent(self, user_input: str) -> str:
         """Determines the intent of the user's input."""
@@ -88,6 +103,8 @@ class SoulOrchestrator:
             "user_input": user_input,
             "intent": None,
             "history": history or [],
-            "response": None
+            "response": None,
+            "proposed_actions": None,
+            "needs_approval": False
         }
         return await self.graph.ainvoke(initial_state)
