@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from typing import Optional
-from sqlalchemy import String, Float, DateTime
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from typing import Optional, List
+from sqlalchemy import String, Float, DateTime, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
     pass
@@ -15,6 +15,11 @@ class Task(Base):
     status: Mapped[str] = mapped_column(String(50), default='todo')
     cognitive_load_score: Mapped[float] = mapped_column(Float, default=0.0)
     sync_status: Mapped[str] = mapped_column(String(50), default='pending')
+    
+    # Recursive Relationship
+    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tasks.id'))
+    children: Mapped[List["Task"]] = relationship("Task", backref="parent", remote_side=[id])
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

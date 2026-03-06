@@ -1,7 +1,7 @@
 # Implementation Plan: Build AI-Native Core & Soul Memory
 
 ## Phase 1: Native Skill System & Recursive Models
-- [ ] Task: Initialize Skill Architecture & Update Models
+- [~] Task: Initialize Skill Architecture & Update Models
     - [ ] Create `core/skills/` directory and define `SkillManager`
     - [ ] Implement initial `task-atomizer/SKILL.md` with ADaPT protocol
     - [ ] Update `Task` model in `core/models.py` to support `parent_id` (recursive)
