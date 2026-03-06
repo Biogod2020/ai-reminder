@@ -1,6 +1,7 @@
 from typing import TypedDict, Optional, List
 from langgraph.graph import StateGraph, END
 from core.adapter import GeminiAdapter
+from core.memory import SoulMemory
 
 class AgentState(TypedDict):
     user_input: str
@@ -13,6 +14,7 @@ class SoulOrchestrator:
 
     def __init__(self):
         self.adapter = GeminiAdapter()
+        self.memory = SoulMemory()
         self.graph = self._build_graph()
 
     def _build_graph(self):
@@ -61,7 +63,9 @@ class SoulOrchestrator:
         return {**state, "response": "Handling task..."}
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
-        return {**state, "response": "Handling memory..."}
+        """Processes memory-related intents using SoulMemory."""
+        await self.memory.add_fact(state["user_input"])
+        return {**state, "response": "I've updated your 'Digital Soul' with this information."}
 
     async def _node_handle_planner(self, state: AgentState) -> AgentState:
         return {**state, "response": "Handling planning..."}
@@ -72,7 +76,6 @@ class SoulOrchestrator:
     async def classify_intent(self, user_input: str) -> str:
         """Determines the intent of the user's input."""
         prompt = f"Classify the following user input into one of these categories: 'task', 'memory', 'planner', 'clarify'.\n\nInput: {user_input}\n\nOutput only the category name."
-        # Use simple classification for now
         response = await self.adapter.generate_content(prompt)
         clean_response = response.strip().lower()
         if clean_response in ['task', 'memory', 'planner', 'clarify']:
