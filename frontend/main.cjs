@@ -3,6 +3,11 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 const http = require('http');
 
+// Load environment variables
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+const API_BASE = process.env.VITE_API_BASE || 'http://localhost:8000';
+
 let mainWindow;
 let tray;
 
@@ -38,7 +43,8 @@ function createWindow() {
 
 function updateTrayMenu() {
   // Fetch tasks from backend to show in tray
-  http.get('http://127.0.0.1:8000/get_view_data', (res) => {
+  const url = `${API_BASE}/get_view_data`;
+  http.get(url, (res) => {
     let data = '';
     res.on('data', (chunk) => data += chunk);
     res.on('end', () => {

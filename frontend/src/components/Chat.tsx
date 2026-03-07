@@ -23,7 +23,8 @@ export function Chat() {
     setIsThinking(true);
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+      const response = await fetch(`${apiBase}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input, history: messages }),
