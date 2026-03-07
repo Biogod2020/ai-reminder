@@ -8,6 +8,7 @@ This track implements a robust, SOTA memory system for the Notion-Soul-Agent usi
 - Develop an "Initialization" Q&A module to bootstrap the user's "Soul" profile.
 - Integrate macOS system metrics (Daily/Weekly/Monthly) to trigger automatic memory updates.
 - **Memory Consolidation:** Implement a tiered compression mechanism (Daily -> 3-Day -> Weekly -> Monthly -> Yearly) to refine raw behavioral data into high-signal insights.
+- **macOS System Integration Research:** Investigate the `knowledgeC.db` (macOS Screen Time database) to extract high-fidelity application usage and focus metrics.
 - Ensure all agent nodes (Atomizer, Nudger, etc.) have access to a **Shared Global Memory**.
 - Stress test the memory engine for performance, concurrency, and temporal accuracy.
 

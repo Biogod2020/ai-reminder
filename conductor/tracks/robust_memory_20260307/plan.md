@@ -52,5 +52,13 @@
     - [x] Create a script/task to run the consolidator at 6 AM.
 - [x] Task: Conductor - User Manual Verification 'Memory Consolidation' (Protocol in workflow.md)
 
+## Phase 7: macOS Screen Time (knowledgeC.db) Research & Integration
+- [x] Task: Research `knowledgeC.db` schema and permissions.
+    - [x] Map specific tables (e.g., ZOBJECT, ZSTRUCTUREDMETADATA) to application usage metrics.
+    - [x] Identify the most reliable query for "Yesterday's App Usage Duration".
+- [x] Task: Prototype high-fidelity habit extraction.
+    - [x] Create a script to fetch and format screen time data for the consolidator.
+- [x] Task: Conductor - User Manual Verification 'Screen Time Research' (Protocol in workflow.md)
+
 ## Phase: Review Fixes
 - [x] Task: Apply review suggestions 8947305
