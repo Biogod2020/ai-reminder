@@ -39,5 +39,5 @@
     - [x] Script a high-volume memory ingestion and retrieval test.
     - [x] Implement concurrency tests for simultaneous multi-node access.
     - [x] Test retrieval accuracy for older interaction patterns vs. new ones.
-- [x] Task: Optimize retrieval and storage performance (Switched to SQLite for 100% proxy robustness).
-- [x] Task: Conductor - User Manual Verification 'Stress Testing' (Protocol in workflow.md)
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 8947305
