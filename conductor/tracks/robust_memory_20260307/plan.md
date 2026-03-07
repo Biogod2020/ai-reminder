@@ -52,3 +52,7 @@
 - [x] Task: SQLite Table Expansion.
     - [x] Create `omni_behavior_log` table to store combined Dual-Axis JSON.
 - [x] Task: Conductor - User Manual Verification 'Dual-Axis Architecture' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 8947305
+- [x] Task: Fix temporal alignment and truth merger granularity ae5591e
