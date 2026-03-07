@@ -9,25 +9,27 @@ from PIL import Image
 from core.adapter import GeminiAdapter
 from core.system_db import KnowledgeDB
 from core.memory import SharedMemoryManager
+from core.truth_merger import DualAxisMerger
 
 logger = logging.getLogger("SynthesisEngine")
 
 class BehaviorSynthesisEngine:
     """
     Assembles visual streams and DB timelines into objective truth slices.
-    Categorizes behavior and identifies key moments for the soul.
+    Implements Dual-Axis Behavioral Architecture.
     """
     
     def __init__(self):
         self.adapter = GeminiAdapter()
         self.system_db = KnowledgeDB()
         self.shared_memory = SharedMemoryManager()
+        self.merger = DualAxisMerger()
         self.capture_dir = "captures"
         self.gallery_dir = "soul_gallery"
 
-    def _get_image_batch(self, start_dt: datetime, end_dt: datetime) -> List[str]:
-        """Finds all processed images within the time range."""
-        image_paths = []
+    def _get_image_batch(self, start_dt: datetime, end_dt: datetime) -> List[Dict[str, Any]]:
+        """Finds all processed images and their metadata within the time range."""
+        images = []
         if not os.path.exists(self.capture_dir):
             return []
             
@@ -35,115 +37,140 @@ class BehaviorSynthesisEngine:
             if not f.startswith("proc_") or not f.endswith(".jpg"):
                 continue
             try:
-                # proc_20260307_204946.jpg
+                # proc_20260308_004946.jpg
                 parts = f.split("_")
                 ts_str = f"{parts[1]}_{parts[2].split('.')[0]}"
                 dt = datetime.strptime(ts_str, "%Y%m%d_%H%M%S")
-                # Simple naive comparison for now
                 if start_dt <= dt <= end_dt:
-                    image_paths.append(os.path.join(self.capture_dir, f))
+                    images.append({
+                        "path": os.path.join(self.capture_dir, f),
+                        "timestamp": dt.isoformat() + "Z",
+                        "filename": f
+                    })
             except Exception:
                 continue
-        return image_paths
+        return images
 
-    async def synthesize_window(self, minutes: int = 30, delete_after: bool = True):
-        """Processes the last X minutes of behavior and cleans up assets."""
-        end_dt = datetime.now()
-        start_dt = end_dt - timedelta(minutes=minutes)
-        
-        logger.info(f"Starting synthesis for window: {start_dt} to {end_dt}")
-        
-        # 1. Fetch Timeline
-        timeline = self.system_db.get_timeline(start_dt, end_dt)
-        timeline_str = "\n".join([f"[{e['start']}] {e['app']} ({e['duration_seconds']}s)" for e in timeline])
-        
-        # 2. Fetch Images
-        image_paths = self._get_image_batch(start_dt, end_dt)
-        if not image_paths and not timeline:
-            logger.info("No data found in window. Skipping synthesis.")
-            return
+    async def generate_intent_axis(self, image_metadata: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Generates a standalone AI Intent Axis based on visual evidence."""
+        if not image_metadata:
+            return []
 
-        # Prepare images for Gemini
         image_data = []
-        for path in image_paths:
+        for item in image_metadata:
             try:
-                img = Image.open(path)
-                image_data.append(img)
+                image_data.append(Image.open(item["path"]))
             except Exception as e:
-                logger.error(f"Failed to open {path}: {e}")
+                logger.error(f"Failed to open {item['path']}: {e}")
 
-        # 3. SOTA Synthesis Prompt
         prompt = f"""
-        TASK: RECONSTRUCT BEHAVIORAL TRUTH (Window: {minutes} minutes)
+        TASK: GENERATE INDEPENDENT INTENT AXIS (Visual Logic Only)
         
-        INPUT DATA:
-        - TIMELINE (knowledgeC.db):
-        {timeline_str if timeline_str else "No app usage recorded in DB."}
-        
-        - VISUAL STREAM: {len(image_paths)} snapshots provided.
+        You are an expert behavior scientist. Analyze the provided sequence of screenshots.
+        Ignore system logs for now; focus strictly on what the user is DOING visually.
         
         INSTRUCTIONS:
-        1. CATEGORIZE: For each significant time block, assign a category: [WORK], [LEISURE], [UTILITY], [AWAY].
-        2. FLOW ANALYSIS: Detect 'Flow States' (high focus, single task) vs 'Fragmentation' (heavy switching).
-        3. KEY MOMENTS: Identify 1-2 'Key Moments' by identifying the visual index (e.g., "Image 5") or timestamp.
-        4. REASONING: Explain WHY you categorized things this way.
+        1. For each significant cluster of images, identify the INTENT.
+        2. CATEGORIES: [WORK], [LEISURE], [UTILITY], [AWAY].
+        3. DETECT: Flow states, context switches, and cognitive intensity (0.0-1.0).
+        4. KEY MOMENTS: Identify milestones or significant screen changes.
         
         OUTPUT FORMAT (JSON ONLY):
         {{
-            "summary": "High level summary of focus and productivity.",
-            "timeline": [
-                {{"start": "ISO", "end": "ISO", "app": "Name", "category": "Work/Leisure/...", "score": 0.0-1.0, "reasoning": "..."}}
-            ],
-            "key_moments": [
-                {{"timestamp": "YYYYMMDD_HHMMSS", "description": "...", "importance": "high"}}
+            "intent_stream": [
+                {{
+                    "timestamp": "ISO timestamp from metadata",
+                    "category": "WORK",
+                    "description": "Short description of screen content",
+                    "focus_score": 0.9,
+                    "is_key_moment": true/false
+                }}
             ]
         }}
         """
         
         try:
-            logger.info(f"Sending {len(image_data)} images to Gemini for synthesis...")
+            logger.info(f"Generating Intent Axis from {len(image_data)} images...")
             response_text = await self.adapter.generate_content(prompt, images=image_data, include_memory=False)
             
-            # Clean JSON
             clean_json = response_text.strip()
             if "```json" in clean_json: clean_json = clean_json.split("```json")[1].split("```")[0].strip()
             elif "```" in clean_json: clean_json = clean_json.split("```")[1].split("```")[0].strip()
             
-            result = json.loads(clean_json)
-            
-            # 4. Handle Key Moments (Move to gallery)
-            key_moment_ts = [km["timestamp"] for km in result.get("key_moments", [])]
-            for ts in key_moment_ts:
-                # Find the corresponding file
-                for path in image_paths:
-                    if ts in path:
-                        dest = os.path.join(self.gallery_dir, os.path.basename(path))
-                        shutil.copy2(path, dest)
-                        logger.info(f"Saved Key Moment: {dest}")
-
-            # 5. Store result in SQLite
-            await self.shared_memory.add(
-                content=result,
-                metadata={"scope": "truth_slice", "window_minutes": minutes}
-            )
-            
-            # 6. Cleanup raw captures
-            if delete_after:
-                for path in image_paths:
-                    try:
-                        os.remove(path)
-                    except Exception:
-                        pass
-                logger.info(f"Cleaned up {len(image_paths)} temporary screenshots.")
-                
-            return result
-            
+            return json.loads(clean_json).get("intent_stream", [])
         except Exception as e:
-            logger.error(f"Synthesis failed: {e}")
-            return None
+            logger.error(f"Intent Axis generation failed: {e}")
+            return []
+
+    async def synthesize_window(self, minutes: int = 30, delete_after: bool = True):
+        """Reconstructs behavioral truth using Dual-Axis Architecture."""
+        end_dt = datetime.now()
+        start_dt = end_dt - timedelta(minutes=minutes)
+        
+        logger.info(f"Synthesizing Dual-Axis window: {start_dt} to {end_dt}")
+        
+        # 1. Axis A: System Objective Axis
+        system_timeline = self.system_db.get_timeline(start_dt, end_dt)
+        
+        # 2. Axis B: AI Visual Intent Axis
+        image_metadata = self._get_image_batch(start_dt, end_dt)
+        intent_stream = await self.generate_intent_axis(image_metadata)
+        
+        # 3. Truth Merger (Logic now Formalized)
+        merged_timeline = self.merger.merge(system_timeline, intent_stream)
+        
+        result = {
+            "window_id": f"window_{end_dt.strftime('%Y%m%d_%H%M')}",
+            "start_time": start_dt.isoformat() + "Z",
+            "end_time": end_dt.isoformat() + "Z",
+            "layers": {
+                "system_axis": system_timeline,
+                "ai_axis": intent_stream,
+                "merged_timeline": merged_timeline
+            }
+        }
+
+        # 4. Handle Key Moments & Gallery
+        for intent in intent_stream:
+            if intent.get("is_key_moment"):
+                ts = intent["timestamp"].replace("-", "").replace(":", "").replace("T", "_").split("Z")[0]
+                # Try to find file matching this timestamp
+                for img in image_metadata:
+                    if ts in img["filename"]:
+                        dest = os.path.join(self.gallery_dir, img["filename"])
+                        shutil.copy2(img["path"], dest)
+                        logger.info(f"Saved Key Moment to Soul Gallery: {dest}")
+
+        # 5. Persistent Storage (SQLite)
+        from sqlalchemy import create_engine, text
+        engine_db = create_engine("sqlite:///notion_soul.db")
+        with engine_db.connect() as conn:
+            stmt = text("""
+                INSERT INTO omni_behavior_log (window_id, start_time, end_time, layers_json, updated_at)
+                VALUES (:wid, :start, :end, :layers, :upd)
+                ON CONFLICT(window_id) DO UPDATE SET
+                    layers_json = excluded.layers_json,
+                    updated_at = excluded.updated_at
+            """)
+            conn.execute(stmt, {
+                "wid": result["window_id"],
+                "start": start_dt,
+                "end": end_dt,
+                "layers": json.dumps(result["layers"]),
+                "upd": datetime.now(timezone.utc)
+            })
+            conn.commit()
+
+        # 6. Cleanup
+        if delete_after:
+            for img in image_metadata:
+                try: os.remove(img["path"])
+                except Exception: pass
+            logger.info(f"Cleaned up {len(image_metadata)} snapshots.")
+            
+        return result
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     engine = BehaviorSynthesisEngine()
-    # To test, we'd need some images in captures/
-    asyncio.run(engine.synthesize_window(30, delete_after=False))
+    asyncio.run(engine.synthesize_window(minutes=30, delete_after=False))

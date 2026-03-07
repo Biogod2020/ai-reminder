@@ -41,3 +41,14 @@
 ## Phase 7: Stress Testing & Verification
 - [x] Task: Run a 4-hour "Live Work" stress test to verify 15s sampling and 30min batching stability (Verified via module tests).
 - [x] Task: Conductor - User Manual Verification 'Multimodal Truth Engine' (Protocol in workflow.md)
+
+## Phase 8: Dual-Axis Behavioral Architecture
+- [x] Task: Update `core/synthesis_engine.py` for independent Intent Axis.
+    - [x] Refactor Prompt to generate a standalone `visual_intent_stream` (15s precision).
+    - [x] Decouple AI intent from KnowledgeDB timeline in the primary synthesis step.
+- [x] Task: Implement `core/truth_merger.py`.
+    - [x] Create merging logic: Overlay Intent Axis (Visual) onto App Axis (System).
+    - [x] Implement conflict detection (e.g. App is Work, Visual is Leisure).
+- [x] Task: SQLite Table Expansion.
+    - [x] Create `omni_behavior_log` table to store combined Dual-Axis JSON.
+- [x] Task: Conductor - User Manual Verification 'Dual-Axis Architecture' (Protocol in workflow.md)
