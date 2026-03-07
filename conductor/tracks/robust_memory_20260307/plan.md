@@ -39,5 +39,18 @@
     - [x] Script a high-volume memory ingestion and retrieval test.
     - [x] Implement concurrency tests for simultaneous multi-node access.
     - [x] Test retrieval accuracy for older interaction patterns vs. new ones.
+- [x] Task: Optimize retrieval and storage performance (Switched to SQLite for 100% proxy robustness).
+- [x] Task: Conductor - User Manual Verification 'Stress Testing' (Protocol in workflow.md)
+
+## Phase 6: Memory Consolidation Engine (Time-Pyramid)
+- [x] Task: Implement `MemoryConsolidator` class in `core/consolidator.py`.
+    - [x] Create multi-tier summarization logic (Daily -> 3-Day -> Weekly -> Monthly -> Yearly).
+    - [x] Add logic to append summaries to `user_soul.md` with clear hierarchy.
+- [x] Task: Implement "Active Memory" optimization.
+    - [x] Add `is_active` flag management to SQLite to hide older raw data while keeping summaries active.
+- [x] Task: Integrate 6 AM Daily Maintenance trigger.
+    - [x] Create a script/task to run the consolidator at 6 AM.
+- [x] Task: Conductor - User Manual Verification 'Memory Consolidation' (Protocol in workflow.md)
+
 ## Phase: Review Fixes
 - [x] Task: Apply review suggestions 8947305
