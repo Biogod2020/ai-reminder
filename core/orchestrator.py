@@ -25,14 +25,23 @@ class SoulOrchestrator:
     """Orchestrates natural language intents using a LangGraph state machine with observability."""
 
     def __init__(self, db_url: str = "sqlite:///notion_soul.db"):
-        """Initializes the SoulOrchestrator with tracing and database support."""
+        """Initializes the SoulOrchestrator with tracing and optimized database support."""
         self.adapter = GeminiAdapter()
         self.memory = SoulMemory()
         self.notifier = Notifier()
         self.langfuse = Langfuse()
         
-        # Database setup
-        self.engine = create_engine(db_url)
+        # Database setup with WAL mode for concurrency
+        self.engine = create_engine(
+            db_url,
+            connect_args={"check_same_thread": False},
+            pool_pre_ping=True
+        )
+        from sqlalchemy import text
+        with self.engine.connect() as conn:
+            conn.execute(text("PRAGMA journal_mode=WAL"))
+            conn.commit()
+        
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         
@@ -76,9 +85,29 @@ class SoulOrchestrator:
 
         return workflow.compile()
 
+    async def _get_global_context(self) -> str:
+        """Retrieves user memory and current schedule to provide context for AI reasoning."""
+        memory_content = self.memory.manager.read_memory()
+        
+        with self.Session() as session:
+            # Get upcoming or in-progress tasks
+            stmt = select(Task).where(Task.status.in_(['todo', 'in_progress'])).limit(10)
+            existing_tasks = session.execute(stmt).scalars().all()
+            
+            schedule_str = "\n".join([f"- {t.title} (Status: {t.status}, Load: {t.cognitive_load_score})" for t in existing_tasks])
+            
+        return f"""
+        ### USER SOUL (HABITS & PREFERENCES)
+        {memory_content if memory_content else "No prior habits recorded."}
+        
+        ### CURRENT SCHEDULE (EXISTING TASKS)
+        {schedule_str if schedule_str else "No active tasks in schedule."}
+        """
+
     async def _node_classify(self, state: AgentState) -> AgentState:
-        """Node: Classifies the user's intent."""
-        intent = await self.classify_intent(state["user_input"])
+        """Node: Classifies the user's intent with global context."""
+        context = await self._get_global_context()
+        intent = await self.classify_intent(state["user_input"], context=context)
         return {**state, "intent": intent}
 
     def _route_intent(self, state: AgentState) -> str:
@@ -86,38 +115,46 @@ class SoulOrchestrator:
         return state["intent"] or "clarify"
 
     async def _node_handle_task(self, state: AgentState) -> AgentState:
-        """Decomposes a task and persists the entire tree to the database."""
-        subtasks = await self.adapter.decompose_task(state["user_input"])
+        """Decomposes a task with awareness of existing schedule and user habits."""
+        context = await self._get_global_context()
+        subtasks = await self.adapter.decompose_task(state["user_input"], context=context)
         
-        # Recursive Persistence
-        with self.Session() as session:
-            new_parent = Task(
-                title=state["user_input"],
-                status='todo',
-                sync_status='pending'
-            )
-            session.add(new_parent)
-            session.flush() 
-            
-            for st in subtasks:
-                child = Task(
-                    title=st.get("title", "Untitled Subtask"),
-                    parent_id=new_parent.id,
-                    cognitive_load_score=st.get("estimated_cognitive_load", 0.5), # Default to 0.5 if AI misses it
-                    duration_minutes=st.get("duration_minutes", 20),
-                    slack_minutes=st.get("slack_minutes", 5),
+        narrative_prompt = f"Context:\n{context}\n\nThe user wants to: '{state['user_input']}'. I've broken it down into {len(subtasks)} steps. Please explain the scientific reasoning behind this plan (focus on CLT/Interleaving and alignment with existing habits) in one or two empathetic sentences."
+        narrative = await self.adapter.generate_content(narrative_prompt, skill_name='narrative-soul')
+
+        try:
+            with self.Session() as session:
+                new_parent = Task(
+                    title=state["user_input"],
                     status='todo',
-                    sync_status='pending'
+                    sync_status='pending',
+                    cognitive_load_score=0.3 # Base load for parent
                 )
-                session.add(child)
-            
-            session.commit()
+                session.add(new_parent)
+                session.flush() 
+                
+                for st in subtasks:
+                    child = Task(
+                        title=st.get("title", "Untitled Subtask"),
+                        parent_id=new_parent.id,
+                        cognitive_load_score=st.get("estimated_cognitive_load") or 0.5,
+                        duration_minutes=st.get("duration_minutes", 20),
+                        slack_minutes=st.get("slack_minutes", 5),
+                        status='todo',
+                        sync_status='pending'
+                    )
+                    session.add(child)
+                
+                session.commit()
+                print(f"DEBUG: Successfully persisted task tree for '{state['user_input']}'")
+        except Exception as e:
+            print(f"ERROR: Persistence failed for '{state['user_input']}': {e}")
 
         return {
             **state, 
             "proposed_actions": subtasks, 
             "needs_approval": True,
-            "response": f"I've broken down '{state['user_input']}' into {len(subtasks)} atomic steps. Please approve the plan."
+            "response": f"{narrative}\n\nI've prepared a sequence of {len(subtasks)} atomic steps. You can review the details below."
         }
 
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
@@ -140,8 +177,19 @@ class SoulOrchestrator:
         return {**state, "response": "Planning logic pending Implementation Phase 3."}
 
     async def _node_handle_clarify(self, state: AgentState) -> AgentState:
-        """Node: Requests clarification for ambiguous input."""
-        return {**state, "response": "I'm not quite sure what you mean. Could you provide more details?"}
+        """Node: Requests precise clarification for vague inputs using AI-generated MCQ."""
+        prompt = f"""
+        The user said: '{state['user_input']}'. This is too vague for a scientific scheduler.
+        
+        Please generate a short, professional, and empathetic response that:
+        1. Acknowledges the intent.
+        2. Asks 1-2 specific questions to clarify (e.g., 'How long do you expect this to take?' or 'What is the main output?').
+        3. Explain that this is necessary for cognitive load balancing.
+        
+        Keep it under 30 words.
+        """
+        response = await self.adapter.generate_content(prompt, skill_name='narrative-soul')
+        return {**state, "response": response}
 
     async def _node_await_approval(self, state: AgentState) -> AgentState:
         """Node: Represents the state where the agent is waiting for user confirmation."""
@@ -201,17 +249,23 @@ class SoulOrchestrator:
             except Exception:
                 return {"action": "Continue", "response": "I've noted your feedback."}
 
-    async def classify_intent(self, user_input: str) -> str:
-        """Determines the intent of the user's input with improved prompt."""
+    async def classify_intent(self, user_input: str, context: Optional[str] = None) -> str:
+        """Determines the intent with a focus on specificity and scientific scheduling."""
         prompt = f"""
-        Classify the following user input into EXACTLY one of these categories:
-        - 'task': If the user wants to add, create, or do a specific task/project.
-        - 'memory': If the user is sharing a preference, habit, or personal fact.
-        - 'planner': If the user wants to reschedule the entire week or month.
-        - 'clarify': If the input is too vague.
+        You are the Brain of Notion-Soul-Agent. Analyze the user's input: '{user_input}'
 
-        Input: {user_input}
-        Output only the category name (lowercase).
+        CONTEXT (Existing Schedule & Memory):
+        {context if context else "No context provided."}
+
+        Your goal is to decide if we should act or ask for more info.
+        
+        RULES:
+        1. 'task': ONLY if the input describes a SPECIFIC action or project that can be scientifically scheduled (e.g., 'Write a 500-word blog post').
+        2. 'clarify': If the input is a task but is TOO VAGUE to estimate cognitive load or duration accurately (e.g., 'I need to report', 'Work on my project', 'Study for exam'). We need to ask questions like 'How long is the session?' or 'What is the specific goal?'.
+        3. 'memory': If the user shares a habit, preference, or fact.
+        4. 'planner': For macro-level rescheduling of the whole day/week.
+
+        Return ONLY the lowercase category name.
         """
         response = await self.adapter.generate_content(prompt)
         clean_response = response.strip().lower()
@@ -248,13 +302,14 @@ class SoulOrchestrator:
                 return {"nudge_needed": False, "error": "AI response parsing failed"}
 
     async def get_optimized_view(self) -> Dict[str, Any]:
-        """Fetches tasks and returns a scientifically interleaved view for the dashboard."""
+        """Fetches all relevant tasks and returns a scientifically interleaved view."""
         with self.Session() as session:
             stmt = select(Task)
             all_tasks = session.execute(stmt).scalars().all()
             
-            # Filter for viewable tasks (no parent or approved)
-            viewable_tasks = [t for t in all_tasks if t.parent_id is None or t.sync_status == 'approved']
+            # Filter: Show top-level tasks or approved subtasks
+            # For stress testing and real-time feel, we now also include 'pending' status
+            viewable_tasks = [t for t in all_tasks if (t.parent_id is None) or (t.sync_status in ['approved', 'pending'])]
             
             # SOTA Interleaving Logic: 
             # 1. Fill scores if missing (randomize for variety if not set)

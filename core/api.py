@@ -1,9 +1,20 @@
 from fastapi import FastAPI, Body
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from core.orchestrator import SoulOrchestrator
 
 app = FastAPI(title="Notion-Soul-Agent API Hub")
+
+# Enable CORS for all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 orchestrator = SoulOrchestrator()
 
 class ChatRequest(BaseModel):
