@@ -78,12 +78,28 @@ class MemoryConsolidator:
         """Generic logic to compress memories from one tier into the next."""
         start_time = datetime.now(timezone.utc) - timedelta(days=days)
         
-        # Additional Context: For Daily Summary, we inject real Screen Time data
+        # Additional Context: For Daily Summary, we prioritize Truth Slices from synthesis engine
         extra_context = ""
         if target_category == "daily_summary":
-            logger.info("Injecting macOS Screen Time data into Daily Summary...")
+            logger.info("Gathering Truth Slices and Screen Time for Daily Summary...")
             screen_time = self._get_screen_time_data(days_back=1)
-            extra_context = f"\nMACOS SCREEN TIME (ACTUAL USAGE):\n{screen_time}\n"
+            
+            # Fetch structured truth slices
+            with self.Session() as session:
+                slice_stmt = text("""
+                    SELECT value FROM user_soul 
+                    WHERE category = 'truth_slice' AND updated_at > :start
+                """)
+                slices = session.execute(slice_stmt, {"start": start_time}).fetchall()
+                truth_content = "\n".join([f"- {s[0]}" for s in slices])
+            
+            extra_context = f"""
+            MACOS SCREEN TIME (ACTUAL DURATIONS):
+            {screen_time}
+            
+            SYNTHESIZED BEHAVIORAL SLICES (VISUAL TRUTH):
+            {truth_content if truth_content else "No visual synthesis available for this period."}
+            """
 
         with self.Session() as session:
             # 1. Fetch active source memories
@@ -100,23 +116,23 @@ class MemoryConsolidator:
 
             raw_text = "\n".join([f"- [{r[2]}] {r[1]}" for r in rows])
             
-            # 2. AI Summarization
+            # 2. AI Summarization - Enhanced for Multimodal Truth
             prompt = f"""
-            SYSTEM PROTOCOL: MEMORY CONSOLIDATION (Tier: {target_category})
+            SYSTEM PROTOCOL: EXECUTIVE SOUL SUMMARY (Tier: {target_category})
             
             You are refining the 'Digital Soul' of the user. 
-            Synthesize the following behavioral data into a high-signal {target_category}.
+            Synthesize the following multidimensional behavioral data into a high-signal {target_category}.
             
             {extra_context}
             
-            INTERNAL AGENT LOGS (SAMPLED):
+            AGENT OBSERVATIONS:
             {raw_text}
             
             INSTRUCTIONS:
-            1. Cross-reference the Agent Logs with the Actual Usage (if available).
-            2. Identify productivity trends, focus blocks, and potential burnout risks.
-            3. Synthesize into a concise, professional summary.
-            4. Output should be strictly the summary text.
+            1. TRUTH RECONCILIATION: Use the Synthesized Slices and Screen Time as the primary truth. 
+            2. PATTERN RECOGNITION: Identify deep flow states, burnout risks, and habit shifts.
+            3. STRATEGIC INSIGHT: How should the user's schedule change based on this behavior?
+            4. Output strictly the refined summary text.
             """
             
             summary = await self.adapter.generate_content(prompt, include_memory=False)

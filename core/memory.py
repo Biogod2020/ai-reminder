@@ -4,7 +4,7 @@ import logging
 import asyncio
 import numpy as np
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -18,7 +18,7 @@ logger = logging.getLogger("SharedMemoryManager")
 
 
 class SharedMemoryManager:
-    """Robust Shared Memory Manager using SQLite for structured facts."""
+    """Robust Shared Memory Manager using SQLite for facts and Truth Slices."""
     
     _instance = None
     
@@ -34,35 +34,32 @@ class SharedMemoryManager:
             return
         self.engine = create_engine(db_url)
         self.Session = sessionmaker(bind=self.engine)
-        self.base_url = os.getenv("LOCAL_PROXY_URL", "http://localhost:8888")
-        self.password = os.getenv("PROXY_PASSWORD", "123456")
         self._initialized = True
         logger.info("Robust SharedMemoryManager initialized.")
 
     async def add(
         self, 
-        content: str, 
+        content: Any, 
         user_id: str = "default_user", 
         metadata: Optional[Dict[str, Any]] = None
     ):
-        """Stores a fact in the SQLite user_soul table.
-        
-        Args:
-            content: The fact string to store.
-            user_id: Identifier for the user.
-            metadata: Optional dict containing 'scope' and 'type'.
-        """
+        """Stores a fact or Truth Slice in the SQLite user_soul table."""
         scope = metadata.get("scope", "soul") if metadata else "soul"
         
-        # We use a hash of the content as a key for idempotency within a scope
-        key_raw = f"{scope}:{content.lower()}"
+        # Handle dict content (e.g. Truth Slices) by serializing to JSON
+        if isinstance(content, dict):
+            content_str = json.dumps(content)
+        else:
+            content_str = str(content)
+            
+        # Unique key for idempotency
+        key_raw = f"{scope}:{content_str.lower()[:200]}"
         key = hashlib.md5(key_raw.encode()).hexdigest()
         
-        logger.info(f"Adding memory to SQLite | Scope: {scope} | Content: {content[:50]}...")
+        logger.info(f"Adding memory | Scope: {scope} | Content snippet: {content_str[:50]}...")
         
         try:
             with self.Session() as session:
-                # Upsert logic for SQLite
                 stmt = text("""
                     INSERT INTO user_soul (key, value, category, updated_at, is_active)
                     VALUES (:key, :value, :category, :updated_at, 1)
@@ -73,9 +70,9 @@ class SharedMemoryManager:
                 """)
                 session.execute(stmt, {
                     "key": key,
-                    "value": content,
+                    "value": content_str,
                     "category": scope,
-                    "updated_at": datetime.utcnow()
+                    "updated_at": datetime.now(timezone.utc)
                 })
                 session.commit()
             return {"status": "success", "key": key}
@@ -90,21 +87,9 @@ class SharedMemoryManager:
         scope: Optional[str] = None, 
         timeframe: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Retrieves relevant facts with temporal and active filtering.
-        
-        Args:
-            query: Search query string.
-            user_id: Identifier for the user.
-            scope: Optional scope filter (e.g., 'soul', 'session').
-            timeframe: Optional 'daily', 'weekly', or 'monthly'.
-        """
-        logger.info(
-            f"Searching memory in SQLite | Scope: {scope} | "
-            f"Timeframe: {timeframe} | Query: {query}"
-        )
+        """Retrieves relevant facts with temporal and active filtering."""
         try:
             with self.Session() as session:
-                # We only search for ACTIVE memories in the normal flow
                 query_str = "SELECT value, category, updated_at FROM user_soul WHERE is_active = 1"
                 params = {}
                 
@@ -117,10 +102,20 @@ class SharedMemoryManager:
                     query_str += f" AND updated_at > datetime('now', '-{days} days')"
                 
                 results = session.execute(text(query_str), params).fetchall()
-                return [
-                    {"content": r[0], "scope": r[1], "updated_at": r[2]} 
-                    for r in results
-                ]
+                
+                formatted = []
+                for val, cat, updated in results:
+                    try:
+                        # Try parsing as JSON if it's a structured slice
+                        content_parsed = json.loads(val)
+                    except Exception:
+                        content_parsed = val
+                    formatted.append({
+                        "content": content_parsed, 
+                        "scope": cat, 
+                        "updated_at": updated
+                    })
+                return formatted
         except Exception as e:
             logger.error(f"Failed to search memory in SQLite: {e}")
             return []
@@ -132,7 +127,6 @@ class SoulMemory:
     def __init__(self, soul_file_path: str = "user_soul.md"):
         self.soul_file_path = soul_file_path
         self.shared_memory = SharedMemoryManager()
-        # Deferred import to avoid circular dependency
         from core.adapter import GeminiAdapter
         self.adapter = GeminiAdapter()
 
@@ -152,14 +146,12 @@ class SoulMemory:
             include_memory=False
         )
         
-        # 2. Update Markdown for human readability
         with open(self.soul_file_path, "a", encoding="utf-8") as f:
             f.write(
                 f"\n\n### Updated {datetime.now().isoformat()}\n"
                 f"{extracted_facts.strip()}"
             )
             
-        # 3. Update SQLite for node sharing
         facts = [
             f.strip("- ").strip() 
             for f in extracted_facts.strip().split("\n") 
@@ -184,3 +176,18 @@ class SoulMemory:
             user_id=user_id, 
             scope=scope
         )
+
+    async def get_active_soul_context(self) -> str:
+        """Retrieves a concatenated string of all active high-signal summaries."""
+        # Fetch summaries (Daily, Weekly, etc.)
+        all_memories = await self.shared_memory.search("", scope=None)
+        summaries = [m for m in all_memories if "_summary" in m["scope"]]
+        
+        if not summaries:
+            return "No high-signal behavioral data yet."
+            
+        context_parts = ["### ACTIVE SOUL INSIGHTS"]
+        for s in summaries:
+            context_parts.append(f"[{s['scope'].upper()}]: {s['content']}")
+            
+        return "\n\n".join(context_parts)
