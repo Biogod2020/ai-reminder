@@ -40,11 +40,10 @@ Notion-Soul-Agent (NSA) 是一个**本地优先 (Local-First)**、具备“生�
 ## 4. 未来规划 (Future Roadmap - Plugins & Modules)
 核心功能验证成功后，将作为“计算增强插件”逐步加入：
 - **本地计算增强 (Local Algo Plugins):**
-    - **CLT 自动评估插件：** 自动捕捉系统指标（AXUIElement）转化为认知负荷数值。
     - **UMP 生物钟算法插件：** 基于 **Borbély 二过程模型** 精准计算波峰，辅助 AI 决策。
 - **多模态深度感知 (Visual Strategist):**
+    - **真相引擎 (Truth Engine):** 整合 macOS `knowledgeC.db` 与高频截图采样，实现秒级行为对齐与意图重构（已实现）。
     - **白板/草稿原位解析：** 直接解析手写草稿生成 ADaPT 拆解树。
-    - **桌面感知模块：** 根据当前屏幕内容动态调整穿插优先级。
 - **系统级融合 (Full System):**
     - **App Intents:** 允许 Siri 驱动 Agent。
     - **Liquid Glass UI:** 高度定制化的 **Electron/Capacitor** 跨端悬浮面板。
