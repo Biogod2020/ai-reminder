@@ -78,31 +78,38 @@ class MemoryConsolidator:
         """Generic logic to compress memories from one tier into the next."""
         start_time = datetime.now(timezone.utc) - timedelta(days=days)
         
-        # Additional Context: For Daily Summary, we prioritize Truth Slices from synthesis engine
+        # Additional Context: For Daily Summary, we prioritize Dual-Axis Timeline from omni_behavior_log
         extra_context = ""
         if target_category == "daily_summary":
-            logger.info("Gathering Truth Slices and Screen Time for Daily Summary...")
+            logger.info("Gathering Dual-Axis Timelines and Screen Time for Daily Summary...")
             screen_time = self._get_screen_time_data(days_back=1)
             
-            # Fetch structured truth slices
+            # Fetch structured timelines from omni_behavior_log
             with self.Session() as session:
-                slice_stmt = text("""
-                    SELECT value FROM user_soul 
-                    WHERE category = 'truth_slice' AND updated_at > :start
+                # Query the new omni_behavior_log table for high-fidelity data
+                stmt = text("""
+                    SELECT layers_json, summary_insight FROM omni_behavior_log 
+                    WHERE end_time > :start
                 """)
-                slices = session.execute(slice_stmt, {"start": start_time}).fetchall()
-                truth_content = "\n".join([f"- {s[0]}" for s in slices])
+                logs = session.execute(stmt, {"start": start_time}).fetchall()
+                
+                # Each log entry has a 'merged_timeline' in layers_json
+                # (Note: In current implementation layers_json stores the merged_timeline directly)
+                truth_content = ""
+                for layers_json, summary in logs:
+                    truth_content += f"\n--- Synthesis Window Summary: {summary} ---\n"
+                    truth_content += layers_json + "\n"
             
             extra_context = f"""
             MACOS SCREEN TIME (ACTUAL DURATIONS):
             {screen_time}
             
-            SYNTHESIZED BEHAVIORAL SLICES (VISUAL TRUTH):
-            {truth_content if truth_content else "No visual synthesis available for this period."}
+            DUAL-AXIS BEHAVIORAL TIMELINES (VISUAL + SYSTEM TRUTH):
+            {truth_content if truth_content else "No high-fidelity synthesis available for this period."}
             """
 
         with self.Session() as session:
-            # 1. Fetch active source memories
+            # 1. Fetch active source memories (for hierarchical summaries above Daily)
             stmt = text("""
                 SELECT id, value, updated_at FROM user_soul 
                 WHERE category = :cat AND updated_at > :start AND is_active = 1
@@ -125,14 +132,15 @@ class MemoryConsolidator:
             
             {extra_context}
             
-            AGENT OBSERVATIONS:
+            LOWER-TIER SUMMARIES / OBSERVATIONS:
             {raw_text}
             
             INSTRUCTIONS:
-            1. TRUTH RECONCILIATION: Use the Synthesized Slices and Screen Time as the primary truth. 
-            2. PATTERN RECOGNITION: Identify deep flow states, burnout risks, and habit shifts.
-            3. STRATEGIC INSIGHT: How should the user's schedule change based on this behavior?
-            4. Output strictly the refined summary text.
+            1. TRUTH RECONCILIATION: Use the DUAL-AXIS TIMELINES and Screen Time as the primary truth for behavior.
+            2. FOCUS ANALYSIS: Analyze 'focus_score' and 'inferred_category' from the JSON data to identify deep work vs. fragmentation.
+            3. PATTERN RECOGNITION: Identify habit shifts, productive hours, and potential burnout risks.
+            4. STRATEGIC INSIGHT: How should the user's schedule change based on this behavior?
+            5. Output strictly the refined summary text.
             """
             
             summary = await self.adapter.generate_content(prompt, include_memory=False)
