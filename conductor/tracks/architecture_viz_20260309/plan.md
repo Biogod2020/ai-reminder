@@ -1,7 +1,7 @@
 # Implementation Plan: Architecture Visualization & Documentation (Track: architecture_viz_20260309)
 
 ## Phase 1: Architecture Analysis & Mermaid Drafting
-- [ ] Task: Analyze current codebase to map out the Backend & AI Core.
+- [~] Task: Analyze current codebase to map out the Backend & AI Core.
     - [ ] Map the `SoulOrchestrator` LangGraph nodes and edges.
     - [ ] Map the Memory Architecture (`SharedMemoryManager`, `MemoryConsolidator`, `omni_behavior_log`).
     - [ ] Map the Perception Pipeline (`VisualSampler`, `KnowledgeDB`, `BehaviorSynthesisEngine`).
