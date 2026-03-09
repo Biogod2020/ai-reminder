@@ -78,6 +78,11 @@ graph TD
         Notify --> End
     end
 
+    subgraph "Heartbeat & API"
+        Nudge["evaluate_nudge (Heartbeat)"]:::system
+        View["get_optimized_view (API)"]:::system
+    end
+
     subgraph "Perception & Synthesis"
         VisSampler["VisualSampler"]:::system
         SysDB["KnowledgeDB"]:::db
@@ -88,6 +93,7 @@ graph TD
 
     subgraph "Memory & Storage"
         SqliteDB[("notion_soul.db")]:::db
+        TasksDB[("Tasks [UT] Table")]:::db
         MemConsol["MemoryConsolidator"]:::system
         UserSoul["user_soul.md"]:::db
     end
@@ -99,18 +105,41 @@ graph TD
     GeminiVision --> TruthMerger
     SysDB --> TruthMerger
     TruthMerger --> SqliteDB
+    
     SqliteDB --> MemConsol
     MemConsol --> UserSoul
-    UserSoul -.-> Classify
-    UserSoul -.-> HandleTask
-    HandleTask -.-> SqliteDB
-    HandleMemory -.-> SqliteDB
+    
+    UserSoul -.->|Read| Classify
+    UserSoul -.->|Read| HandleTask
+    
+    HandleTask -.->|Write| TasksDB
+    HandlePlanner -.->|Read/Write| TasksDB
+    HandleMemory -.->|Write| SqliteDB
+    
+    Classify -.->|Read| TasksDB
+    Nudge -.->|Read| TasksDB
+    View -.->|Read| TasksDB
 
+    %% All Nodes Clickable
+    click User "#node-user"
     click Classify "#node-classify"
     click HandleTask "#node-handle-task"
+    click HandleMemory "#node-handle-memory"
+    click HandlePlanner "#node-handle-planner"
+    click HandleClarify "#node-handle-clarify"
+    click AwaitApproval "#node-await-approval"
+    click Notify "#node-notify"
+    click Nudge "#node-nudge"
+    click View "#node-view"
+    click VisSampler "#node-vis-sampler"
+    click SysDB "#node-sys-db"
     click SynEngine "#node-syn-engine"
+    click GeminiVision "#node-gemini-vision"
     click TruthMerger "#node-truth-merger"
+    click SqliteDB "#node-sqlite-db"
+    click TasksDB "#node-tasks-db"
     click MemConsol "#node-mem-consol"
+    click UserSoul "#node-user-soul"
             </div>
         </section>
 
@@ -127,18 +156,27 @@ graph TD
             
             <div id="card-container" class="space-y-6 overflow-y-auto flex-1 scrollbar-hide pb-20">
                 <!-- Node Detail Cards -->
+                <div id="node-user" class="card p-6 rounded-2xl space-y-4" data-name="User">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">User Input / Dashboard</h3>
+                        <span class="badge badge-logic">Client</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">The entry point for natural language requests and behavioral feedback. Triggers the Orchestrator loop.</p>
+                </div>
+
                 <div id="node-classify" class="card p-6 rounded-2xl space-y-4" data-name="classify">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">classify</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Determines user intent by analyzing input against long-term habits and current schedule context.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Determines user intent by analyzing input against long-term habits (UserSoul) and current Task DB schedule.</p>
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <span class="badge badge-in mb-2 block w-fit">Input</span>
                             <ul class="text-[10px] font-semibold space-y-1">
                                 <li>• user_input (str)</li>
-                                <li>• context (Soul Memory)</li>
+                                <li>• user_soul.md (Context)</li>
+                                <li>• Tasks [UT] (Current)</li>
                             </ul>
                         </div>
                         <div>
@@ -155,23 +193,63 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">handle_task</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Decomposes complex goals into atomic subtasks using ADaPT protocol and empathetic narrative generation.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Decomposes complex goals into atomic subtasks. Writes the resulting task tree directly to the Task DB.</p>
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <span class="badge badge-in mb-2 block w-fit">Input</span>
                             <ul class="text-[10px] font-semibold space-y-1">
                                 <li>• user_input</li>
-                                <li>• global_context</li>
+                                <li>• user_soul.md</li>
                             </ul>
                         </div>
                         <div>
                             <span class="badge badge-out mb-2 block w-fit">Output</span>
                             <ul class="text-[10px] font-semibold space-y-1 text-green-700">
-                                <li>• task_tree (json)</li>
+                                <li>• Task DB (New Tree)</li>
                                 <li>• narrative (str)</li>
                             </ul>
                         </div>
                     </div>
+                </div>
+
+                <div id="node-handle-memory" class="card p-6 rounded-2xl space-y-4" data-name="handle_memory">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">handle_memory</h3>
+                        <span class="badge badge-logic">AI Node</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Extracts habits or preferences from input and persists them to the Soul Fact table in SQLite.</p>
+                </div>
+
+                <div id="node-handle-planner" class="card p-6 rounded-2xl space-y-4" data-name="handle_planner">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">handle_planner</h3>
+                        <span class="badge badge-logic">AI Node</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Performs scientific rescheduling of the entire day/week by reading and writing to the Tasks [UT] Table.</p>
+                </div>
+
+                <div id="node-nudge" class="card p-6 rounded-2xl space-y-4" data-name="evaluate_nudge">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">evaluate_nudge (Heartbeat)</h3>
+                        <span class="badge badge-logic">Proactive Node</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Regularly checks current task status against schedule. Decides if an empathetic nudge is required based on cognitive load.</p>
+                </div>
+
+                <div id="node-view" class="card p-6 rounded-2xl space-y-4" data-name="get_optimized_view">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">get_optimized_view (API)</h3>
+                        <span class="badge badge-logic">API Node</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Fetches tasks and applies SOTA Interleaving logic to present a scientifically optimized schedule view to the Dashboard.</p>
+                </div>
+
+                <div id="node-vis-sampler" class="card p-6 rounded-2xl space-y-4" data-name="VisualSampler">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">VisualSampler</h3>
+                        <span class="badge badge-logic">System</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Captures screenshots every 15s, performs RGB conversion and quality optimization for AI vision ingestion.</p>
                 </div>
 
                 <div id="node-syn-engine" class="card p-6 rounded-2xl space-y-4" data-name="BehaviorSynthesisEngine">
@@ -180,21 +258,6 @@ graph TD
                         <span class="badge badge-logic">Core Logic</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Orchestrates Dual-Axis synthesis by aligning system app logs with AI visual intent from screenshots.</p>
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <span class="badge badge-in mb-2 block w-fit">Input</span>
-                            <ul class="text-[10px] font-semibold space-y-1">
-                                <li>• image_batch (List[PIL])</li>
-                                <li>• app_timeline (KnowledgeDB)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <span class="badge badge-out mb-2 block w-fit">Output</span>
-                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
-                                <li>• behavior_truth_slice</li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="node-truth-merger" class="card p-6 rounded-2xl space-y-4" data-name="DualAxisMerger">
@@ -203,21 +266,14 @@ graph TD
                         <span class="badge badge-logic">Algorithm</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Performs point-to-point overlay of visual intent and app blocks, applying inertia smoothing to fill temporal gaps.</p>
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <span class="badge badge-in mb-2 block w-fit">Input</span>
-                            <ul class="text-[10px] font-semibold space-y-1">
-                                <li>• system_axis</li>
-                                <li>• ai_intent_axis</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <span class="badge badge-out mb-2 block w-fit">Output</span>
-                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
-                                <li>• merged_omni_log</li>
-                            </ul>
-                        </div>
+                </div>
+
+                <div id="node-tasks-db" class="card p-6 rounded-2xl space-y-4" data-name="Tasks">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">Tasks [UT] Table</h3>
+                        <span class="badge badge-logic">Database</span>
                     </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">The central registry for all scheduled atomic tasks. Read by classify/planner, written by handle_task/planner.</p>
                 </div>
 
                 <div id="node-mem-consol" class="card p-6 rounded-2xl space-y-4" data-name="MemoryConsolidator">
@@ -225,21 +281,15 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">MemoryConsolidator</h3>
                         <span class="badge badge-logic">System Agent</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Implements Time-Pyramid consolidation to distill high-volume raw logs into long-term behavioral habits.</p>
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <span class="badge badge-in mb-2 block w-fit">Input</span>
-                            <ul class="text-[10px] font-semibold space-y-1">
-                                <li>• raw_behavior_logs</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <span class="badge badge-out mb-2 block w-fit">Output</span>
-                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
-                                <li>• consolidated_patterns</li>
-                            </ul>
-                        </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Implements Time-Pyramid consolidation to distill high-volume raw logs into long-term behavioral habits in user_soul.md.</p>
+                </div>
+
+                <div id="node-user-soul" class="card p-6 rounded-2xl space-y-4" data-name="user_soul">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">user_soul.md</h3>
+                        <span class="badge badge-logic">Memory</span>
                     </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">The human-readable 'Digital Soul'. Provides 1M context for AI reasoning about habits and cognitive peaks.</p>
                 </div>
             </div>
         </section>
@@ -261,30 +311,58 @@ graph TD
                 });
             });
 
+            // Highlight card function
+            const highlightCard = (label) => {
+                const term = label.toLowerCase().split(' ')[0].replace(/[^a-z]/g, '');
+                const targetCard = Array.from(cards).find(c => {
+                    const dataName = c.getAttribute('data-name').toLowerCase();
+                    const h3Text = c.querySelector('h3').innerText.toLowerCase();
+                    return dataName.includes(term) || h3Text.includes(term);
+                });
+
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    cards.forEach(c => c.classList.remove('active'));
+                    targetCard.classList.add('active');
+                    setTimeout(() => targetCard.classList.remove('active'), 3000);
+                }
+            };
+
+            // Listen for hash changes (for link clicks)
+            window.addEventListener('hashchange', () => {
+                const hash = window.location.hash;
+                if (hash.startsWith('#node-')) {
+                    const cardId = hash.substring(1);
+                    const targetCard = document.getElementById(cardId);
+                    if (targetCard) {
+                        highlightCard(targetCard.getAttribute('data-name') || targetCard.querySelector('h3').innerText);
+                    }
+                }
+            });
+
+            // Initial check if hash exists
+            if (window.location.hash) {
+                const cardId = window.location.hash.substring(1);
+                const targetCard = document.getElementById(cardId);
+                if (targetCard) highlightCard(targetCard.getAttribute('data-name') || targetCard.querySelector('h3').innerText);
+            }
+
+            // MutationObserver to add click listeners to mermaid nodes
             const observer = new MutationObserver(() => {
                 const nodes = document.querySelectorAll('.node');
                 nodes.forEach(node => {
                     node.style.cursor = 'pointer';
-                    node.addEventListener('click', () => {
+                    node.addEventListener('click', (e) => {
                         const labelEl = node.querySelector('.nodeLabel');
-                        if (!labelEl) return;
-                        const label = labelEl.innerText.toLowerCase().split(' ')[0];
-                        const targetCard = Array.from(cards).find(c => 
-                            c.getAttribute('data-name').toLowerCase().includes(label) || 
-                            c.querySelector('h3').innerText.toLowerCase().includes(label)
-                        );
-
-                        if (targetCard) {
-                            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            cards.forEach(c => c.classList.remove('active'));
-                            targetCard.classList.add('active');
-                            setTimeout(() => targetCard.classList.remove('active'), 2000);
+                        if (labelEl) {
+                            highlightCard(labelEl.innerText);
                         }
                     });
                 });
             });
-observer.observe(document.querySelector('.mermaid'), { childList: true, subtree: true });
-});
-</script>
+
+            observer.observe(document.querySelector('.mermaid'), { childList: true, subtree: true });
+        });
+    </script>
 </body>
 </html>
