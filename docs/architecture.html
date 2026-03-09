@@ -158,35 +158,34 @@ graph TD
                 </div>
             </div>
             
-            <div id="card-container" class="space-y-6 overflow-y-auto flex-1 scrollbar-hide pb-20">
+            <div id="card-container" class="space-y-6 overflow-y-auto flex-1 scrollbar-hide pb-20 text-justify">
                 <!-- Node Detail Cards -->
                 <div id="node-user" class="card p-6 rounded-2xl space-y-4" data-name="User">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">User Input / Dashboard</h3>
                         <span class="badge badge-logic">Client</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">The entry point for natural language requests and behavioral feedback. Triggers the Orchestrator loop.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">The entry point for natural language requests and behavioral feedback. Triggers the Orchestrator loop via API.</p>
                 </div>
 
                 <div id="node-classify" class="card p-6 rounded-2xl space-y-4" data-name="classify">
                     <div class="flex justify-between items-start">
-                        <h3 class="text-lg font-bold text-[#37352f]">classify</h3>
+                        <h3 class="text-lg font-bold text-[#37352f]">classify (Node)</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Determines user intent by analyzing input against long-term habits (UserSoul) and current Task DB schedule.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Uses global context (Memory + Current Tasks) to route user intent to specialized handlers.</p>
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <span class="badge badge-in mb-2 block w-fit">Input</span>
                             <ul class="text-[10px] font-semibold space-y-1">
                                 <li>• user_input (str)</li>
-                                <li>• user_soul.md (Context)</li>
-                                <li>• Tasks [UT] (Current)</li>
+                                <li>• global_context</li>
                             </ul>
                         </div>
                         <div>
                             <span class="badge badge-out mb-2 block w-fit">Output</span>
                             <ul class="text-[10px] font-semibold space-y-1 text-green-700">
-                                <li>• intent (task|memory|...)</li>
+                                <li>• intent (str)</li>
                             </ul>
                         </div>
                     </div>
@@ -194,58 +193,66 @@ graph TD
 
                 <div id="node-handle-task" class="card p-6 rounded-2xl space-y-4" data-name="handle_task">
                     <div class="flex justify-between items-start">
-                        <h3 class="text-lg font-bold text-[#37352f]">handle_task</h3>
+                        <h3 class="text-lg font-bold text-[#37352f]">handle_task (Node)</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Decomposes complex goals into atomic subtasks. Writes the resulting task tree directly to the Task DB.</p>
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <span class="badge badge-in mb-2 block w-fit">Input</span>
-                            <ul class="text-[10px] font-semibold space-y-1">
-                                <li>• user_input</li>
-                                <li>• user_soul.md</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <span class="badge badge-out mb-2 block w-fit">Output</span>
-                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
-                                <li>• Task DB (New Tree)</li>
-                                <li>• narrative (str)</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Decomposes goals into atomic subtasks using ADaPT. Persists task tree to SQLite with 'pending' sync status.</p>
                 </div>
 
                 <div id="node-handle-memory" class="card p-6 rounded-2xl space-y-4" data-name="handle_memory">
                     <div class="flex justify-between items-start">
-                        <h3 class="text-lg font-bold text-[#37352f]">handle_memory</h3>
+                        <h3 class="text-lg font-bold text-[#37352f]">handle_memory (Node)</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Extracts habits or preferences from input and persists them to the Soul Fact table in SQLite.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Extracts durable facts or habits. Updates the internal SQLite 'user_soul' table and triggers long-term memory sync.</p>
                 </div>
 
                 <div id="node-handle-planner" class="card p-6 rounded-2xl space-y-4" data-name="handle_planner">
                     <div class="flex justify-between items-start">
-                        <h3 class="text-lg font-bold text-[#37352f]">handle_planner</h3>
+                        <h3 class="text-lg font-bold text-[#37352f]">handle_planner (Node)</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Performs scientific rescheduling of the entire day/week by reading and writing to the Tasks [UT] Table.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Analyzes schedule density and cognitive load to propose optimized re-planning of tasks.</p>
+                </div>
+
+                <div id="node-handle-clarify" class="card p-6 rounded-2xl space-y-4" data-name="handle_clarify">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">handle_clarify (Node)</h3>
+                        <span class="badge badge-logic">AI Node</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Generated MCQ (Minimal Clarification Questions) when intent confidence is low (< 0.8).</p>
+                </div>
+
+                <div id="node-await-approval" class="card p-6 rounded-2xl space-y-4" data-name="await_approval">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">await_approval (Node)</h3>
+                        <span class="badge badge-logic">Wait State</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Suspends graph execution until user explicitly approves proposed tasks or schedule changes.</p>
+                </div>
+
+                <div id="node-notify" class="card p-6 rounded-2xl space-y-4" data-name="notify">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">notify (Node)</h3>
+                        <span class="badge badge-logic">Action</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Dispatches macOS native notifications or Bark push alerts for completed syncs or critical nudges.</p>
                 </div>
 
                 <div id="node-nudge" class="card p-6 rounded-2xl space-y-4" data-name="evaluate_nudge">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">evaluate_nudge (Heartbeat)</h3>
-                        <span class="badge badge-logic">Proactive Node</span>
+                        <span class="badge badge-logic">Proactive</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Regularly checks current task status against schedule. Decides if an empathetic nudge is required based on cognitive load.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Async loop that monitors 'in_progress' tasks. If duration exceeds estimate, triggers empathy-based nudge.</p>
                 </div>
 
                 <div id="node-view" class="card p-6 rounded-2xl space-y-4" data-name="get_optimized_view">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">get_optimized_view (API)</h3>
-                        <span class="badge badge-logic">API Node</span>
+                        <span class="badge badge-logic">API</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Fetches tasks and applies SOTA Interleaving logic to present a scientifically optimized schedule view to the Dashboard.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">FastAPI endpoint that serves scientifically interleaved tasks (Hard/Soft interleaving) to the UI.</p>
                 </div>
 
                 <div id="node-vis-sampler" class="card p-6 rounded-2xl space-y-4" data-name="VisualSampler">
@@ -253,7 +260,15 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">VisualSampler</h3>
                         <span class="badge badge-logic">System</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Captures screenshots every 15s, performs RGB conversion and quality optimization for AI vision ingestion.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Captures 15s interval Retina screenshots. Processes RGBA to RGB and compresses to JPEG 85 quality.</p>
+                </div>
+
+                <div id="node-sys-db" class="card p-6 rounded-2xl space-y-4" data-name="KnowledgeDB">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">KnowledgeDB</h3>
+                        <span class="badge badge-logic">System DB</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Direct interface to macOS knowledgeC.db. Extracts ZOBJECT and ZSTRUCTUREDINSTANCE for app timelines.</p>
                 </div>
 
                 <div id="node-syn-engine" class="card p-6 rounded-2xl space-y-4" data-name="BehaviorSynthesisEngine">
@@ -261,7 +276,15 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">BehaviorSynthesisEngine</h3>
                         <span class="badge badge-logic">Core Logic</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Orchestrates Dual-Axis synthesis by aligning system app logs with AI visual intent from screenshots.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Orchestrates Dual-Axis truth. Feeds image batches to Gemini and merges results with system logs.</p>
+                </div>
+
+                <div id="node-gemini-vision" class="card p-6 rounded-2xl space-y-4" data-name="Gemini">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">Gemini 3.1 (Vision)</h3>
+                        <span class="badge badge-logic">VLM</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Analyzes visual frames to determine semantic intent, focus scores, and identifies key moments.</p>
                 </div>
 
                 <div id="node-truth-merger" class="card p-6 rounded-2xl space-y-4" data-name="DualAxisMerger">
@@ -269,31 +292,47 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">DualAxisMerger</h3>
                         <span class="badge badge-logic">Algorithm</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Performs point-to-point overlay of visual intent and app blocks, applying inertia smoothing to fill temporal gaps.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Aligns asynchronous visual points with system duration blocks. Implements temporal gap-filling logic.</p>
+                </div>
+
+                <div id="node-sqlite-db" class="card p-6 rounded-2xl space-y-4" data-name="notion_soul.db">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">notion_soul.db</h3>
+                        <span class="badge badge-logic">Database</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">Primary SQLite storage with WAL enabled. Stores omni_behavior_log, tasks, and user_soul state.</p>
                 </div>
 
                 <div id="node-tasks-db" class="card p-6 rounded-2xl space-y-4" data-name="Tasks">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">Tasks [UT] Table</h3>
-                        <span class="badge badge-logic">Database</span>
+                        <span class="badge badge-logic">Logic DB</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">The central registry for all scheduled atomic tasks. Read by classify/planner, written by handle_task/planner.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Database view of all scheduled work. Tracked via 'sync_status' for eventual write-back to Notion.</p>
                 </div>
 
                 <div id="node-mem-consol" class="card p-6 rounded-2xl space-y-4" data-name="MemoryConsolidator">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">MemoryConsolidator</h3>
-                        <span class="badge badge-logic">System Agent</span>
+                        <span class="badge badge-logic">Agent</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Implements Time-Pyramid consolidation to distill high-volume raw logs into long-term behavioral habits in user_soul.md.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Distills daily raw logs into habit summaries. Compresses Time-Pyramid (1D -> 3D -> 7D -> 30D).</p>
                 </div>
 
                 <div id="node-user-soul" class="card p-6 rounded-2xl space-y-4" data-name="user_soul">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-bold text-[#37352f]">user_soul.md</h3>
-                        <span class="badge badge-logic">Memory</span>
+                        <span class="badge badge-logic">Context</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">The human-readable 'Digital Soul'. Provides 1M context for AI reasoning about habits and cognitive peaks.</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">The Markdown 'Brain' of the user. Read as 1M context injection for every AI decision.</p>
+                </div>
+
+                <div id="node-end" class="card p-6 rounded-2xl space-y-4" data-name="END">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-[#37352f]">END</h3>
+                        <span class="badge badge-logic">Terminal</span>
+                    </div>
+                    <p class="text-xs leading-relaxed text-[#787774]">The terminal state of the SoulOrchestrator graph. Indicates completion of the current processing turn.</p>
                 </div>
             </div>
         </section>
@@ -317,12 +356,29 @@ graph TD
 
             // Highlight card function
             const highlightCard = (label) => {
-                const term = label.toLowerCase().split(' ')[0].replace(/[^a-z]/g, '');
-                const targetCard = Array.from(cards).find(c => {
-                    const dataName = c.getAttribute('data-name').toLowerCase();
+                const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const rawLabel = label.toLowerCase();
+                
+                // Prioritize exact or highly specific matches
+                let targetCard = Array.from(cards).find(c => {
+                    const dataName = (c.getAttribute('data-name') || '').toLowerCase();
                     const h3Text = c.querySelector('h3').innerText.toLowerCase();
-                    return dataName.includes(term) || h3Text.includes(term);
+                    return dataName === rawLabel || h3Text === rawLabel;
                 });
+
+                if (!targetCard) {
+                    const term = normalize(label.split('(')[0].split(' ')[0]);
+                    targetCard = Array.from(cards).find(c => {
+                        const dataName = normalize(c.getAttribute('data-name') || '');
+                        const h3Text = normalize(c.querySelector('h3').innerText);
+                        // If term is 'user', check if it's soul or input
+                        if (term === 'user') {
+                            if (rawLabel.includes('soul')) return dataName.includes('soul');
+                            if (rawLabel.includes('input')) return dataName.includes('user');
+                        }
+                        return dataName.includes(term) || h3Text.includes(term);
+                    });
+                }
 
                 if (targetCard) {
                     targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
