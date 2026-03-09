@@ -18,10 +18,10 @@
 - [x] Task: Design the layout and UI components. [22590e9]
     - [ ] Create a split-pane or stacked layout accommodating the large diagram and the documentation section.
     - [ ] Design the HTML structure for the "Node Detail Cards" featuring input/output badges.
-- [~] Task: Conductor - User Manual Verification 'Phase 2: HTML Scaffold & Styling' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: HTML Scaffold & Styling' (Protocol in workflow.md) [checkpoint: 95770cf]
 
 ## Phase 3: Interactivity Implementation
-- [ ] Task: Implement JavaScript for interactive node clicking.
+- [~] Task: Implement JavaScript for interactive node clicking.
     - [ ] Add event listeners to the rendered Mermaid SVG nodes.
     - [ ] Implement smooth scrolling to the corresponding Node Detail Card when a node is clicked.
     - [ ] Add a visual highlight effect to the selected card.
