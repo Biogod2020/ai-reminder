@@ -27,6 +27,13 @@ class FeedbackRequest(BaseModel):
     task_id: int
     user_feedback: str
 
+class TraceScoreRequest(BaseModel):
+    """Data model for submitting a score to a Langfuse trace."""
+    trace_id: str
+    name: str  # e.g., "user-approval"
+    value: float  # e.g., 1.0 or 0.0
+    comment: Optional[str] = None
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -62,3 +69,14 @@ async def handle_response(request: FeedbackRequest):
         user_feedback=request.user_feedback
     )
     return result
+
+@app.post("/submit_trace_score")
+async def submit_trace_score(request: TraceScoreRequest):
+    """Submits a score (feedback) to a specific Langfuse trace."""
+    orchestrator.langfuse.score(
+        trace_id=request.trace_id,
+        name=request.name,
+        value=request.value,
+        comment=request.comment
+    )
+    return {"status": "score_submitted"}

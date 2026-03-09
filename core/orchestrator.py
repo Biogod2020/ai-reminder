@@ -1,11 +1,12 @@
 from typing import TypedDict, Optional, List, Any, Dict
 from datetime import datetime, timezone
+import os
 import json
 import random
 from langgraph.graph import StateGraph, END
 from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import sessionmaker
-from langfuse import Langfuse
+from langfuse import Langfuse, observe
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
 from core.models import Base, Task, UserSoul
@@ -29,7 +30,13 @@ class SoulOrchestrator:
         self.adapter = GeminiAdapter()
         self.memory = SoulMemory()
         self.notifier = Notifier()
-        self.langfuse = Langfuse()
+        
+        # Initialize Langfuse with explicit credentials from .env
+        self.langfuse = Langfuse(
+            public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
+            secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+            host=os.getenv("LANGFUSE_HOST")
+        )
         
         # Database setup with WAL mode for concurrency
         self.engine = create_engine(
@@ -85,6 +92,7 @@ class SoulOrchestrator:
 
         return workflow.compile()
 
+    @observe()
     async def _get_global_context(self) -> str:
         """Retrieves user memory and current schedule to provide context for AI reasoning."""
         memory_content = self.memory.manager.read_memory()
@@ -104,6 +112,7 @@ class SoulOrchestrator:
         {schedule_str if schedule_str else "No active tasks in schedule."}
         """
 
+    @observe()
     async def _node_classify(self, state: AgentState) -> AgentState:
         """Node: Classifies the user's intent with global context."""
         context = await self._get_global_context()
@@ -114,6 +123,7 @@ class SoulOrchestrator:
         """Conditional Edge: Routes to the appropriate node based on intent."""
         return state["intent"] or "clarify"
 
+    @observe()
     async def _node_handle_task(self, state: AgentState) -> AgentState:
         """Decomposes a task with awareness of existing schedule and user habits."""
         context = await self._get_global_context()
@@ -157,6 +167,7 @@ class SoulOrchestrator:
             "response": f"{narrative}\n\nI've prepared a sequence of {len(subtasks)} atomic steps. You can review the details below."
         }
 
+    @observe()
     async def _node_handle_memory(self, state: AgentState) -> AgentState:
         """Processes memory-related intents using SoulMemory and persists to UserSoul table."""
         await self.memory.add_fact(state["user_input"])
@@ -172,10 +183,12 @@ class SoulOrchestrator:
 
         return {**state, "response": "I've updated your 'Digital Soul' with this information.", "notify_user": True}
 
+    @observe()
     async def _node_handle_planner(self, state: AgentState) -> AgentState:
         """Node: Handles macro planning requests."""
         return {**state, "response": "Planning logic pending Implementation Phase 3."}
 
+    @observe()
     async def _node_handle_clarify(self, state: AgentState) -> AgentState:
         """Node: Requests precise clarification for vague inputs using AI-generated MCQ."""
         prompt = f"""
@@ -191,10 +204,12 @@ class SoulOrchestrator:
         response = await self.adapter.generate_content(prompt, skill_name='narrative-soul')
         return {**state, "response": response}
 
+    @observe()
     async def _node_await_approval(self, state: AgentState) -> AgentState:
         """Node: Represents the state where the agent is waiting for user confirmation."""
         return {**state, "response": state.get("response", "Waiting for your approval.")}
 
+    @observe()
     async def _node_notify(self, state: AgentState) -> AgentState:
         """Node: Sends a notification if the state requires it."""
         if state.get("notify_user"):
@@ -353,15 +368,6 @@ class SoulOrchestrator:
 
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
         """Executes the orchestrator graph with Langfuse tracing."""
-        trace = None
-        try:
-            trace = self.langfuse.trace(
-                name="Orchestrator Run",
-                input={"user_input": user_input, "history": history}
-            )
-        except Exception:
-            pass 
-        
         initial_state: AgentState = {
             "user_input": user_input,
             "intent": None,
@@ -372,9 +378,7 @@ class SoulOrchestrator:
             "notify_user": False
         }
         
+        # Invoke the graph
         final_state = await self.graph.ainvoke(initial_state)
-        
-        if trace:
-            trace.update(output={"intent": final_state["intent"], "response": final_state["response"]})
         
         return final_state
