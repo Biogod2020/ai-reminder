@@ -25,11 +25,11 @@
     - [ ] Add event listeners to the rendered Mermaid SVG nodes.
     - [ ] Implement smooth scrolling to the corresponding Node Detail Card when a node is clicked.
     - [ ] Add a visual highlight effect to the selected card.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Interactivity Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Interactivity Implementation' (Protocol in workflow.md) [checkpoint: 9478428]
 
 ## Phase 4: Documentation Population
-- [ ] Task: Populate Node Detail Cards with accurate specifications.
-    - [ ] Write detailed Input, Output, and Functionality descriptions for all Orchestrator nodes.
-    - [ ] Write detailed specifications for Memory and Perception pipeline components.
-    - [ ] Ensure formatting matches the designed UI cards (using Tailwind classes for badges/styling).
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Documentation Population' (Protocol in workflow.md)
+- [x] Task: Populate Node Detail Cards with accurate specifications. [9478428]
+    - [x] Write detailed Input, Output, and Functionality descriptions for all Orchestrator nodes.
+    - [x] Write detailed specifications for Memory and Perception pipeline components.
+    - [x] Ensure formatting matches the designed UI cards (using Tailwind classes for badges/styling).
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Documentation Population' (Protocol in workflow.md) [checkpoint: 9478428]
