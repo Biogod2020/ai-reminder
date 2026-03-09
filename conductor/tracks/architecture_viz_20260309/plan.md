@@ -21,11 +21,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: HTML Scaffold & Styling' (Protocol in workflow.md) [checkpoint: 95770cf]
 
 ## Phase 3: Interactivity Implementation
-- [~] Task: Implement JavaScript for interactive node clicking.
+- [x] Task: Implement JavaScript for interactive node clicking. [4740658]
     - [ ] Add event listeners to the rendered Mermaid SVG nodes.
     - [ ] Implement smooth scrolling to the corresponding Node Detail Card when a node is clicked.
     - [ ] Add a visual highlight effect to the selected card.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Interactivity Implementation' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Interactivity Implementation' (Protocol in workflow.md)
 
 ## Phase 4: Documentation Population
 - [ ] Task: Populate Node Detail Cards with accurate specifications.
