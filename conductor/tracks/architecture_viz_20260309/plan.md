@@ -15,10 +15,10 @@
     - [ ] Create `docs/architecture.html` (or `docs/index.html` within an architecture folder).
     - [ ] Integrate Mermaid.js via CDN.
     - [ ] Integrate Tailwind CSS via CDN for rapid, modern styling.
-- [~] Task: Design the layout and UI components.
+- [x] Task: Design the layout and UI components. [22590e9]
     - [ ] Create a split-pane or stacked layout accommodating the large diagram and the documentation section.
     - [ ] Design the HTML structure for the "Node Detail Cards" featuring input/output badges.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: HTML Scaffold & Styling' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: HTML Scaffold & Styling' (Protocol in workflow.md)
 
 ## Phase 3: Interactivity Implementation
 - [ ] Task: Implement JavaScript for interactive node clicking.
