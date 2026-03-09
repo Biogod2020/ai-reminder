@@ -166,6 +166,21 @@ graph TD
                         <span class="badge badge-logic">Client</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">The entry point for natural language requests and behavioral feedback. Triggers the Orchestrator loop via API.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• User Query</li>
+                                <li>• UI Actions</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• API Trigger</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-classify" class="card p-6 rounded-2xl space-y-4" data-name="classify">
@@ -197,6 +212,22 @@ graph TD
                         <span class="badge badge-logic">AI Node</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Decomposes goals into atomic subtasks using ADaPT. Persists task tree to SQLite with 'pending' sync status.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• user_input</li>
+                                <li>• habit_context</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Subtask Tree</li>
+                                <li>• Logic Narrative</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-handle-memory" class="card p-6 rounded-2xl space-y-4" data-name="handle_memory">
@@ -205,6 +236,20 @@ graph TD
                         <span class="badge badge-logic">AI Node</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Extracts durable facts or habits. Updates the internal SQLite 'user_soul' table and triggers long-term memory sync.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• user_input</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Soul Fact (DB)</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-handle-planner" class="card p-6 rounded-2xl space-y-4" data-name="handle_planner">
@@ -213,6 +258,21 @@ graph TD
                         <span class="badge badge-logic">AI Node</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Analyzes schedule density and cognitive load to propose optimized re-planning of tasks.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Tasks [UT]</li>
+                                <li>• Load Metrics</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Proposed Plan</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-handle-clarify" class="card p-6 rounded-2xl space-y-4" data-name="handle_clarify">
@@ -220,7 +280,21 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">handle_clarify (Node)</h3>
                         <span class="badge badge-logic">AI Node</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Generated MCQ (Minimal Clarification Questions) when intent confidence is low (< 0.8).</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Generated MCQ (Minimal Clarification Questions) when intent confidence is low (&lt; 0.8).</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• vague_input</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Clarification MCQ</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-await-approval" class="card p-6 rounded-2xl space-y-4" data-name="await_approval">
@@ -229,6 +303,20 @@ graph TD
                         <span class="badge badge-logic">Wait State</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Suspends graph execution until user explicitly approves proposed tasks or schedule changes.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• proposed_actions</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• User Signal</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-notify" class="card p-6 rounded-2xl space-y-4" data-name="notify">
@@ -237,6 +325,20 @@ graph TD
                         <span class="badge badge-logic">Action</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Dispatches macOS native notifications or Bark push alerts for completed syncs or critical nudges.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• notify_payload</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• OS Alert / Push</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-nudge" class="card p-6 rounded-2xl space-y-4" data-name="evaluate_nudge">
@@ -245,6 +347,21 @@ graph TD
                         <span class="badge badge-logic">Proactive</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Async loop that monitors 'in_progress' tasks. If duration exceeds estimate, triggers empathy-based nudge.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Task Status</li>
+                                <li>• Time Elapsed</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Nudge Decision</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-view" class="card p-6 rounded-2xl space-y-4" data-name="get_optimized_view">
@@ -253,6 +370,20 @@ graph TD
                         <span class="badge badge-logic">API</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">FastAPI endpoint that serves scientifically interleaved tasks (Hard/Soft interleaving) to the UI.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Tasks [UT]</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• View JSON</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-vis-sampler" class="card p-6 rounded-2xl space-y-4" data-name="VisualSampler">
@@ -261,6 +392,20 @@ graph TD
                         <span class="badge badge-logic">System</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Captures 15s interval Retina screenshots. Processes RGBA to RGB and compresses to JPEG 85 quality.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Retina Screen</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• JPEG Frame</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-sys-db" class="card p-6 rounded-2xl space-y-4" data-name="KnowledgeDB">
@@ -269,6 +414,20 @@ graph TD
                         <span class="badge badge-logic">System DB</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Direct interface to macOS knowledgeC.db. Extracts ZOBJECT and ZSTRUCTUREDINSTANCE for app timelines.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• SQLite Binary</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• App Timeline</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-syn-engine" class="card p-6 rounded-2xl space-y-4" data-name="BehaviorSynthesisEngine">
@@ -277,6 +436,21 @@ graph TD
                         <span class="badge badge-logic">Core Logic</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Orchestrates Dual-Axis truth. Feeds image batches to Gemini and merges results with system logs.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Image Batch</li>
+                                <li>• App Timeline</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Behavior Truth</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-gemini-vision" class="card p-6 rounded-2xl space-y-4" data-name="Gemini">
@@ -285,6 +459,20 @@ graph TD
                         <span class="badge badge-logic">VLM</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Analyzes visual frames to determine semantic intent, focus scores, and identifies key moments.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Frames + Prompts</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Intent Axis</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-truth-merger" class="card p-6 rounded-2xl space-y-4" data-name="DualAxisMerger">
@@ -293,6 +481,21 @@ graph TD
                         <span class="badge badge-logic">Algorithm</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Aligns asynchronous visual points with system duration blocks. Implements temporal gap-filling logic.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• System Axis</li>
+                                <li>• AI Axis</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Merged Omni Log</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-sqlite-db" class="card p-6 rounded-2xl space-y-4" data-name="notion_soul.db">
@@ -301,6 +504,20 @@ graph TD
                         <span class="badge badge-logic">Database</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Primary SQLite storage with WAL enabled. Stores omni_behavior_log, tasks, and user_soul state.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Raw Logs</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Structured Data</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-tasks-db" class="card p-6 rounded-2xl space-y-4" data-name="Tasks">
@@ -309,6 +526,20 @@ graph TD
                         <span class="badge badge-logic">Logic DB</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">Database view of all scheduled work. Tracked via 'sync_status' for eventual write-back to Notion.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Proposed Steps</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Scheduled Work</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-mem-consol" class="card p-6 rounded-2xl space-y-4" data-name="MemoryConsolidator">
@@ -316,7 +547,21 @@ graph TD
                         <h3 class="text-lg font-bold text-[#37352f]">MemoryConsolidator</h3>
                         <span class="badge badge-logic">Agent</span>
                     </div>
-                    <p class="text-xs leading-relaxed text-[#787774]">Distills daily raw logs into habit summaries. Compresses Time-Pyramid (1D -> 3D -> 7D -> 30D).</p>
+                    <p class="text-xs leading-relaxed text-[#787774]">Distills daily raw logs into habit summaries. Compresses Time-Pyramid (1D -&gt; 3D -&gt; 7D -&gt; 30D).</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Omni Logs</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• Summaries</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-user-soul" class="card p-6 rounded-2xl space-y-4" data-name="user_soul">
@@ -325,6 +570,20 @@ graph TD
                         <span class="badge badge-logic">Context</span>
                     </div>
                     <p class="text-xs leading-relaxed text-[#787774]">The Markdown 'Brain' of the user. Read as 1M context injection for every AI decision.</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <span class="badge badge-in mb-2 block w-fit">Input</span>
+                            <ul class="text-[10px] font-semibold space-y-1">
+                                <li>• Summaries</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <span class="badge badge-out mb-2 block w-fit">Output</span>
+                            <ul class="text-[10px] font-semibold space-y-1 text-green-700">
+                                <li>• 1M Context</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="node-end" class="card p-6 rounded-2xl space-y-4" data-name="END">
