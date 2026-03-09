@@ -11,11 +11,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Architecture Analysis' (Protocol in workflow.md) [checkpoint: df5febe]
 
 ## Phase 2: HTML Scaffold & Styling
-- [~] Task: Set up the standalone HTML document.
+- [x] Task: Set up the standalone HTML document. [840c78c]
     - [ ] Create `docs/architecture.html` (or `docs/index.html` within an architecture folder).
     - [ ] Integrate Mermaid.js via CDN.
     - [ ] Integrate Tailwind CSS via CDN for rapid, modern styling.
-- [ ] Task: Design the layout and UI components.
+- [~] Task: Design the layout and UI components.
     - [ ] Create a split-pane or stacked layout accommodating the large diagram and the documentation section.
     - [ ] Design the HTML structure for the "Node Detail Cards" featuring input/output badges.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: HTML Scaffold & Styling' (Protocol in workflow.md)
