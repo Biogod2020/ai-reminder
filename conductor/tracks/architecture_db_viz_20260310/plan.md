@@ -8,18 +8,18 @@ This phase focuses on setting up the persistence layer for node metadata and pop
 - [x] Task: Write tests for database operations (CRUD for node metadata). [d412f8c]
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Data Ingestion' (Protocol in workflow.md)
 
-## Phase 2: Metadata API & Backend Integration
+## Phase 2: Metadata API & Backend Integration [checkpoint: 1b10955]
 Expose the metadata via FastAPI to the frontend.
 
 - [x] Task: Add a new FastAPI endpoint `/api/v1/viz/nodes/{node_id}` to retrieve metadata. [0cc51de]
 - [x] Task: Add a bulk endpoint `/api/v1/viz/nodes` for the initial graph load. [0cc51de]
 - [x] Task: Write integration tests for the new API endpoints. [0cc51de]
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Metadata API & Backend Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Metadata API & Backend Integration' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Scaffolding & Visualization Research
 Select and set up the visualization library.
 
-- [ ] Task: Research and select a visualization library (e.g., React Flow, Cytoscape.js, or LangGraph-native exports) that supports zoom/pan and custom overlays.
+- [~] Task: Research and select a visualization library (e.g., React Flow, Cytoscape.js, or LangGraph-native exports) that supports zoom/pan and custom overlays.
 - [ ] Task: Create a new frontend component `ArchitectureDashboard.tsx` or similar.
 - [ ] Task: Implement the base graph layout with zoom and pan capabilities.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
