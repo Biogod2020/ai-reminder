@@ -32,10 +32,10 @@ Connect the frontend to the backend and add interactivity.
 - [x] Task: Implement responsive design and collapsible node groups (if applicable to current graph depth). [d038535]
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
 
-## Phase 5: Final Refinement & Acceptance
+## Phase 5: Final Refinement & Acceptance [checkpoint: b43eb7f]
 Polishing the experience and verifying against the spec.
 
 - [x] Task: Verify that every node in the graph has complete and accurate hover information. [ee53fc0]
 - [x] Task: Optimize rendering performance for the canvas. [ee53fc0]
 - [x] Task: Update the project's README or docs to point to the new interactive architecture view. [adb263f]
-- [~] Task: Conductor - User Manual Verification 'Phase 5: Final Refinement & Acceptance' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Final Refinement & Acceptance' (Protocol in workflow.md)
