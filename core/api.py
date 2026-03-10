@@ -81,6 +81,11 @@ async def submit_trace_score(request: TraceScoreRequest):
     )
     return {"status": "score_submitted"}
 
+@app.get("/api/v1/viz/graph")
+async def get_graph_structure():
+    """Returns the Mermaid graph structure of the orchestrator."""
+    return {"mermaid": orchestrator.graph.get_graph().draw_mermaid()}
+
 @app.get("/api/v1/viz/nodes/{node_id}")
 async def get_node_metadata(node_id: str):
     """Retrieves metadata for a specific architecture visualization node."""

@@ -13,25 +13,46 @@
         body { font-family: 'Inter', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* Minimal React Flow Mock Styling */
-        .node {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-        .node:hover {
-            transform: translateY(-2px);
-            border-color: #2383e2;
-            box-shadow: 0 10px 15px -3px rgba(35, 131, 226, 0.1);
-        }
-        .node.active {
-            border-color: #2383e2;
-            background-color: #f0f7ff;
-        }
         .sidebar {
             transition: transform 0.3s ease-in-out;
         }
         .sidebar.closed {
             transform: translateX(100%);
+        }
+        
+        /* Mermaid Styling Overrides */
+        .mermaid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .node rect, .node circle, .node ellipse, .node polygon, .node path {
+            fill: #ffffff !important;
+            stroke: #e9e9e7 !important;
+            stroke-width: 2px !important;
+            transition: all 0.2s ease;
+        }
+        .node:hover rect, .node:hover circle, .node:hover ellipse, .node:hover polygon, .node:hover path {
+            stroke: #2383e2 !important;
+            filter: drop-shadow(0 4px 6px rgba(35, 131, 226, 0.1));
+            cursor: pointer;
+        }
+        .node .label {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+            fill: #37352f !important;
+        }
+        .edgePath path {
+            stroke: #e9e9e7 !important;
+            stroke-width: 2px !important;
+        }
+        .edgeLabel {
+            background-color: #f7f6f3 !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 10px !important;
+            color: #787774 !important;
         }
     </style>
 </head>
@@ -44,14 +65,14 @@
                 <div class="w-6 h-6 bg-[#2383e2] rounded-md flex items-center justify-center">
                     <i data-lucide="network" class="text-white w-4 h-4"></i>
                 </div>
-                <h1 class="text-xl font-black tracking-tight">ARCHITECTURE ENGINE</h1>
+                <h1 class="text-xl font-black tracking-tight uppercase">Architecture Engine</h1>
             </div>
-            <p class="text-xs text-[#787774] font-medium uppercase tracking-widest">Standalone Data-Driven Visualization</p>
+            <p class="text-xs text-[#787774] font-medium uppercase tracking-widest">Interactive LangGraph Visualization</p>
         </div>
         <div class="flex items-center gap-4">
             <div class="px-3 py-1.5 rounded-full bg-[#f7f6f3] text-[10px] font-bold text-[#787774] border border-[#e9e9e7] flex items-center gap-2">
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                CONNECTED TO SQLITE
+                LIVE CORE CONNECTED
             </div>
             <button onclick="location.reload()" class="p-2 hover:bg-[#f7f6f3] rounded-full transition-colors">
                 <i data-lucide="refresh-cw" class="w-4 h-4 text-[#787774]"></i>
@@ -62,14 +83,17 @@
     <!-- Main Content -->
     <main class="flex-1 flex overflow-hidden relative">
         
-        <!-- Graph Canvas (Mocked Interactive Logic) -->
-        <div id="canvas" class="flex-1 p-12 overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start align-start content-start">
-            <!-- Nodes will be injected here -->
-            <div class="col-span-full text-center py-20 opacity-50" id="loader">
-                <div class="animate-spin mb-4 inline-block">
-                    <i data-lucide="loader-2" class="w-8 h-8 text-[#2383e2]"></i>
+        <!-- Graph Canvas -->
+        <div id="canvas-container" class="flex-1 overflow-hidden flex items-center justify-center p-8 bg-[#fbfbfa]">
+            <div id="mermaid-graph" class="mermaid opacity-0 transition-opacity duration-500">
+                <!-- Mermaid SVG will be rendered here -->
+            </div>
+            
+            <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-[#f7f6f3]/80 z-20 transition-opacity">
+                <div class="animate-spin mb-4 inline-block text-[#2383e2]">
+                    <i data-lucide="loader-2" class="w-10 h-10"></i>
                 </div>
-                <p>Fetching node metadata from database...</p>
+                <p class="font-bold text-[#787774] uppercase tracking-widest text-xs">Synthesizing Graph...</p>
             </div>
         </div>
 
@@ -78,7 +102,7 @@
             <div class="p-8 flex flex-col h-full overflow-y-auto">
                 <div class="flex items-center justify-between mb-10">
                     <div class="px-3 py-1 bg-[#2383e2]/10 text-[#2383e2] text-[10px] font-bold rounded-full uppercase tracking-[0.2em]">
-                        Metadata Insight
+                        Node Intelligence
                     </div>
                     <button onclick="closeSidebar()" class="p-2 hover:bg-[#f7f6f3] rounded-full transition-colors">
                         <i data-lucide="x" class="w-5 h-5 text-[#787774]"></i>
@@ -94,69 +118,98 @@
                 </div>
 
                 <div class="mt-auto pt-12 border-t border-[#e9e9e7] text-[10px] text-[#787774] text-center uppercase tracking-[0.3em] font-bold">
-                    NSA Core System
+                    System Architecture Insight
                 </div>
             </div>
         </aside>
     </main>
 
-    <script>
-        const API_URL = 'http://localhost:8000/api/v1/viz/nodes';
-        let nodesData = [];
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+        const API_NODES = 'http://localhost:8000/api/v1/viz/nodes';
+        const API_GRAPH = 'http://localhost:8000/api/v1/viz/graph';
+        
+        let nodesMetadata = [];
+
+        // Global callback for Mermaid click events
+        window.handleNodeClick = function(nodeId) {
+            console.log("Clicked node:", nodeId);
+            const cleanId = nodeId.replace(/["']/g, ''); // Clean quotes if any
+            showDetails(cleanId);
+        };
 
         async function init() {
             lucide.createIcons();
-            await fetchNodes();
+            
+            // Initialize Mermaid with 'loose' security to allow click events
+            mermaid.initialize({ 
+                startOnLoad: false,
+                securityLevel: 'loose',
+                theme: 'neutral',
+                fontFamily: 'Inter',
+                flowchart: {
+                    useMaxWidth: false,
+                    htmlLabels: true,
+                    curve: 'basis'
+                }
+            });
+
+            await fetchAndRender();
         }
 
-        async function fetchNodes() {
+        async function fetchAndRender() {
             try {
-                const res = await fetch(API_URL);
-                if (!res.ok) throw new Error('API offline');
-                nodesData = await res.json();
-                renderGraph();
+                const [nodesRes, graphRes] = await Promise.all([
+                    fetch(API_NODES),
+                    fetch(API_GRAPH)
+                ]);
+
+                if (!nodesRes.ok || !graphRes.ok) throw new Error('API offline');
+
+                nodesMetadata = await nodesRes.json();
+                const graphData = await graphRes.json();
+                
+                let mermaidDefinition = graphData.mermaid;
+                
+                // Enhanced Mermaid Definition: Add click handlers for all nodes
+                const nodeIds = nodesMetadata.map(n => n.node_id);
+                nodeIds.forEach(id => {
+                    // Syntax: click nodeID call handleNodeClick("nodeID")
+                    mermaidDefinition += `\n    click ${id} call handleNodeClick("${id}")`;
+                });
+
+                const container = document.getElementById('mermaid-graph');
+                const { svg, bindFunctions } = await mermaid.render('architecture-graph', mermaidDefinition);
+                
+                container.innerHTML = svg;
+                container.classList.remove('opacity-0');
+                document.getElementById('loader').classList.add('opacity-0');
+                setTimeout(() => document.getElementById('loader').remove(), 500);
+
+                if (bindFunctions) {
+                    bindFunctions(container);
+                }
+
             } catch (err) {
+                console.error(err);
                 document.getElementById('loader').innerHTML = `
                     <div class="text-red-500 mb-4"><i data-lucide="alert-circle" class="w-12 h-12 mx-auto"></i></div>
-                    <p class="font-bold text-red-500">Failed to connect to Backend</p>
-                    <p class="text-xs mt-2 text-[#787774]">Please run 'uvicorn core.api:app'</p>
+                    <p class="font-bold text-red-500 uppercase tracking-tighter text-sm">System Backend Offline</p>
+                    <p class="text-[10px] mt-2 text-[#787774] font-medium uppercase tracking-widest">Run: uvicorn core.api:app</p>
                 `;
                 lucide.createIcons();
             }
         }
 
-        function renderGraph() {
-            const canvas = document.getElementById('canvas');
-            canvas.innerHTML = '';
-            
-            nodesData.forEach(node => {
-                const el = document.createElement('div');
-                el.className = 'node bg-white border-2 border-[#e9e9e7] rounded-xl p-5 shadow-sm flex flex-col gap-3 relative';
-                el.onclick = () => showDetails(node.node_id);
-                el.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-[#f7f6f3] flex items-center justify-center text-[#2383e2]">
-                            <i data-lucide="cpu" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm leading-tight capitalize">${node.node_id.replace('_', ' ')}</h3>
-                            <p class="text-[10px] text-[#787774] font-medium uppercase tracking-wider">${node.role}</p>
-                        </div>
-                    </div>
-                    <div class="h-px bg-[#e9e9e7] w-full"></div>
-                    <div class="flex gap-2">
-                        <span class="px-2 py-0.5 rounded bg-[#f7f6f3] text-[9px] font-bold text-[#787774] border border-[#e9e9e7]">DYNAMIC</span>
-                        <span class="px-2 py-0.5 rounded bg-[#2383e2]/5 text-[9px] font-bold text-[#2383e2] border border-[#2383e2]/10 uppercase tracking-tighter">LangGraph Node</span>
-                    </div>
-                `;
-                canvas.appendChild(el);
-            });
-            lucide.createIcons();
-        }
-
         function showDetails(nodeId) {
-            const node = nodesData.find(n => n.node_id === nodeId);
-            if (!node) return;
+            const node = nodesMetadata.find(n => n.node_id === nodeId);
+            if (!node) {
+                // If node metadata is missing (e.g. entry/end nodes), don't show sidebar
+                if (['__start__', '__end__'].includes(nodeId)) return;
+                console.warn("No metadata for node:", nodeId);
+                return;
+            }
 
             const header = document.getElementById('node-header');
             const details = document.getElementById('node-details');
@@ -166,7 +219,7 @@
                     <i data-lucide="cpu" class="w-8 h-8"></i>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-black text-[#37352f] leading-none mb-1 capitalize">${node.node_id.replace('_', ' ')}</h2>
+                    <h2 class="text-2xl font-black text-[#37352f] leading-none mb-1 capitalize">${node.node_id.replace(/_/g, ' ')}</h2>
                     <p class="text-xs text-[#787774] font-bold uppercase tracking-[0.1em]">${node.role}</p>
                 </div>
             `;
@@ -183,7 +236,7 @@
 
                 <section>
                     <h3 class="text-[11px] font-black text-[#787774] uppercase tracking-[0.25em] mb-4 flex items-center gap-3">
-                        <i data-lucide="code-2" class="w-4 h-4"></i> Implementation
+                        <i data-lucide="code-2" class="w-4 h-4"></i> Source Implementation
                     </h3>
                     <div class="bg-[#1e1e1e] p-4 rounded-xl text-[#d4d4d4] text-xs font-mono break-all border border-black/50 shadow-inner">
                         ${node.code_mapping}
@@ -192,15 +245,15 @@
 
                 <section>
                     <h3 class="text-[11px] font-black text-[#787774] uppercase tracking-[0.25em] mb-4 flex items-center gap-3">
-                        <i data-lucide="git-branch" class="w-4 h-4"></i> I/O Schema
+                        <i data-lucide="git-branch" class="w-4 h-4"></i> Input/Output Pattern
                     </h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="p-4 bg-white border border-[#e9e9e7] rounded-xl">
-                            <p class="text-[9px] font-bold text-[#787774] uppercase mb-1">Input</p>
+                            <p class="text-[9px] font-bold text-[#787774] uppercase mb-1">Incoming</p>
                             <p class="text-xs font-bold text-[#2383e2]">${node.io_schema.type || 'AgentState'}</p>
                         </div>
                         <div class="p-4 bg-white border border-[#e9e9e7] rounded-xl">
-                            <p class="text-[9px] font-bold text-[#787774] uppercase mb-1">Output</p>
+                            <p class="text-[9px] font-bold text-[#787774] uppercase mb-1">Outgoing</p>
                             <p class="text-xs font-bold text-[#2383e2]">${node.io_schema.output || 'AgentState'}</p>
                         </div>
                     </div>
@@ -211,9 +264,9 @@
             lucide.createIcons();
         }
 
-        function closeSidebar() {
+        window.closeSidebar = function() {
             document.getElementById('sidebar').classList.add('closed');
-        }
+        };
 
         window.onload = init;
     </script>
