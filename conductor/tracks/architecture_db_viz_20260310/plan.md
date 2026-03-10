@@ -35,7 +35,7 @@ Connect the frontend to the backend and add interactivity.
 ## Phase 5: Final Refinement & Acceptance
 Polishing the experience and verifying against the spec.
 
-- [~] Task: Verify that every node in the graph has complete and accurate hover information.
-- [ ] Task: Optimize rendering performance for the canvas.
-- [ ] Task: Update the project's README or docs to point to the new interactive architecture view.
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Final Refinement & Acceptance' (Protocol in workflow.md)
+- [x] Task: Verify that every node in the graph has complete and accurate hover information. [ee53fc0]
+- [x] Task: Optimize rendering performance for the canvas. [ee53fc0]
+- [x] Task: Update the project's README or docs to point to the new interactive architecture view. [adb263f]
+- [~] Task: Conductor - User Manual Verification 'Phase 5: Final Refinement & Acceptance' (Protocol in workflow.md)
