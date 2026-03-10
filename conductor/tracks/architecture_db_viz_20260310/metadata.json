@@ -1,0 +1,8 @@
+{
+  "track_id": "architecture_db_viz_20260310",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-10T10:00:00Z",
+  "updated_at": "2026-03-10T10:00:00Z",
+  "description": "@docs/architecture_v2.html 默认视图有点小，同时不是所有节点都有悬浮信息，请你改进一下，同时如果可以的话可以把 节点的信息做成个数据库，我们的html就是用来调用这个数据库（也许可以用langgraph某些 内置的功能来便捷/快速地做到？）"
+}
