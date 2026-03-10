@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { WeeklySchedule } from './components/WeeklySchedule'
 import { Chat } from './components/Chat'
-import { LayoutDashboard, Calendar as CalendarIcon, BrainCircuit, Settings, PanelRightOpen, PanelRightClose } from 'lucide-react'
+import ArchitectureDashboard from './components/ArchitectureDashboard'
+import { LayoutDashboard, Calendar as CalendarIcon, BrainCircuit, Settings, PanelRightOpen, PanelRightClose, Network } from 'lucide-react'
 import { cn } from './lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 function App() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(true)
+  const [activeTab, setActiveTab] = useState('Overview')
 
   return (
     <div className="flex h-screen w-full bg-[#ffffff] text-[#37352f] overflow-hidden font-sans">
@@ -20,12 +22,18 @@ function App() {
         </div>
         
         <nav className="flex-1 space-y-2">
-          {[{ icon: LayoutDashboard, label: 'Overview' }, { icon: CalendarIcon, label: 'History' }, { icon: BrainCircuit, label: 'Cognitive' }].map((item) => (
+          {[
+            { icon: LayoutDashboard, label: 'Overview' }, 
+            { icon: Network, label: 'Architecture' },
+            { icon: CalendarIcon, label: 'History' }, 
+            { icon: BrainCircuit, label: 'Cognitive' }
+          ].map((item) => (
             <button
               key={item.label}
+              onClick={() => setActiveTab(item.label)}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                item.label === 'Overview' ? "bg-white shadow-sm text-[#2383e2]" : "text-[#787774] hover:bg-[#ebebe9]"
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer",
+                item.label === activeTab ? "bg-white shadow-sm text-[#2383e2]" : "text-[#787774] hover:bg-[#ebebe9]"
               )}
             >
               <item.icon className="w-5 h-5 shrink-0" />
@@ -44,8 +52,14 @@ function App() {
 
       {/* --- Main Content Area --- */}
       <div className="flex-1 flex overflow-hidden relative bg-white">
-        <main className="flex-1 overflow-hidden">
-          <WeeklySchedule />
+        <main className="flex-1 overflow-hidden h-full w-full">
+          {activeTab === 'Overview' && <WeeklySchedule />}
+          {activeTab === 'Architecture' && <ArchitectureDashboard />}
+          {activeTab !== 'Overview' && activeTab !== 'Architecture' && (
+            <div className="h-full flex items-center justify-center text-[#787774]">
+              {activeTab} Content Coming Soon
+            </div>
+          )}
         </main>
 
         {/* --- Sidebar Console --- */}
