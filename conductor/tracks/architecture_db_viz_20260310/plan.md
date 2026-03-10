@@ -16,18 +16,18 @@ Expose the metadata via FastAPI to the frontend.
 - [x] Task: Write integration tests for the new API endpoints. [0cc51de]
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Metadata API & Backend Integration' (Protocol in workflow.md)
 
-## Phase 3: Frontend Scaffolding & Visualization Research
+## Phase 3: Frontend Scaffolding & Visualization Research [checkpoint: 5e85fcb]
 Select and set up the visualization library.
 
 - [x] Task: Research and select a visualization library (e.g., React Flow, Cytoscape.js, or LangGraph-native exports) that supports zoom/pan and custom overlays. [3ee1740]
 - [x] Task: Create a new frontend component `ArchitectureDashboard.tsx` or similar. [7171c4d]
 - [x] Task: Implement the base graph layout with zoom and pan capabilities. [5edaa1e]
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
 
 ## Phase 4: Data-Driven Interactive UI
 Connect the frontend to the backend and add interactivity.
 
-- [ ] Task: Integrate API calls to fetch node metadata on hover or click.
+- [~] Task: Integrate API calls to fetch node metadata on hover or click.
 - [ ] Task: Implement the "Detail View" (sidebar or floating tooltip) to display all metadata fields.
 - [ ] Task: Implement responsive design and collapsible node groups (if applicable to current graph depth).
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
