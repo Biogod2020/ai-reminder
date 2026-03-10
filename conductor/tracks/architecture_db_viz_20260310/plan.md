@@ -19,10 +19,10 @@ Expose the metadata via FastAPI to the frontend.
 ## Phase 3: Frontend Scaffolding & Visualization Research
 Select and set up the visualization library.
 
-- [~] Task: Research and select a visualization library (e.g., React Flow, Cytoscape.js, or LangGraph-native exports) that supports zoom/pan and custom overlays.
-- [ ] Task: Create a new frontend component `ArchitectureDashboard.tsx` or similar.
-- [ ] Task: Implement the base graph layout with zoom and pan capabilities.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
+- [x] Task: Research and select a visualization library (e.g., React Flow, Cytoscape.js, or LangGraph-native exports) that supports zoom/pan and custom overlays. [3ee1740]
+- [x] Task: Create a new frontend component `ArchitectureDashboard.tsx` or similar. [7171c4d]
+- [x] Task: Implement the base graph layout with zoom and pan capabilities. [5edaa1e]
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
 
 ## Phase 4: Data-Driven Interactive UI
 Connect the frontend to the backend and add interactivity.
