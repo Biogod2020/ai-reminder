@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -80,3 +80,16 @@ async def submit_trace_score(request: TraceScoreRequest):
         comment=request.comment
     )
     return {"status": "score_submitted"}
+
+@app.get("/api/v1/viz/nodes/{node_id}")
+async def get_node_metadata(node_id: str):
+    """Retrieves metadata for a specific architecture visualization node."""
+    metadata = await orchestrator.get_node_metadata(node_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail=f"Node {node_id} not found")
+    return metadata
+
+@app.get("/api/v1/viz/nodes")
+async def get_all_nodes_metadata():
+    """Retrieves metadata for all architecture visualization nodes."""
+    return await orchestrator.get_all_nodes_metadata()

@@ -366,6 +366,45 @@ class SoulOrchestrator:
                 }
             }
 
+    async def get_node_metadata(self, node_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieves visualization metadata for a specific graph node."""
+        with self.Session() as session:
+            stmt = select(VizMetadata).where(VizMetadata.node_id == node_id)
+            node = session.execute(stmt).scalars().one_or_none()
+            if not node:
+                return None
+            
+            return {
+                "node_id": node.node_id,
+                "role": node.role,
+                "description": node.description,
+                "code_mapping": node.code_mapping,
+                "io_schema": json.loads(node.io_schema) if node.io_schema else {},
+                "load_metrics": json.loads(node.load_metrics) if node.load_metrics else {},
+                "metadata_json": json.loads(node.metadata_json) if node.metadata_json else {},
+                "updated_at": node.updated_at.isoformat()
+            }
+
+    async def get_all_nodes_metadata(self) -> List[Dict[str, Any]]:
+        """Retrieves visualization metadata for all graph nodes."""
+        with self.Session() as session:
+            stmt = select(VizMetadata)
+            nodes = session.execute(stmt).scalars().all()
+            
+            return [
+                {
+                    "node_id": node.node_id,
+                    "role": node.role,
+                    "description": node.description,
+                    "code_mapping": node.code_mapping,
+                    "io_schema": json.loads(node.io_schema) if node.io_schema else {},
+                    "load_metrics": json.loads(node.load_metrics) if node.load_metrics else {},
+                    "metadata_json": json.loads(node.metadata_json) if node.metadata_json else {},
+                    "updated_at": node.updated_at.isoformat()
+                }
+                for node in nodes
+            ]
+
     async def run(self, user_input: str, history: List[dict] = None) -> AgentState:
         """Executes the orchestrator graph with Langfuse tracing."""
         initial_state: AgentState = {
