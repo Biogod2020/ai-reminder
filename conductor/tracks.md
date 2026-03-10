@@ -49,6 +49,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Standalone Architecture Visualization Tool (Refactored)**
+- [x] **Track: Standalone Architecture Visualization Tool (Refactored)**
 *Link: [./tracks/architecture_db_viz_20260310/](./tracks/architecture_db_viz_20260310/)*
 
