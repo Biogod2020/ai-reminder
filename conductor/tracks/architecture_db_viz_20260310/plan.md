@@ -11,10 +11,10 @@ This phase focuses on setting up the persistence layer for node metadata and pop
 ## Phase 2: Metadata API & Backend Integration
 Expose the metadata via FastAPI to the frontend.
 
-- [~] Task: Add a new FastAPI endpoint `/api/v1/viz/nodes/{node_id}` to retrieve metadata.
-- [ ] Task: Add a bulk endpoint `/api/v1/viz/nodes` for the initial graph load.
-- [ ] Task: Write integration tests for the new API endpoints.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Metadata API & Backend Integration' (Protocol in workflow.md)
+- [x] Task: Add a new FastAPI endpoint `/api/v1/viz/nodes/{node_id}` to retrieve metadata. [0cc51de]
+- [x] Task: Add a bulk endpoint `/api/v1/viz/nodes` for the initial graph load. [0cc51de]
+- [x] Task: Write integration tests for the new API endpoints. [0cc51de]
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Metadata API & Backend Integration' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Scaffolding & Visualization Research
 Select and set up the visualization library.
