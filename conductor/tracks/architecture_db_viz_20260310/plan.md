@@ -27,10 +27,10 @@ Select and set up the visualization library.
 ## Phase 4: Data-Driven Interactive UI
 Connect the frontend to the backend and add interactivity.
 
-- [~] Task: Integrate API calls to fetch node metadata on hover or click.
-- [ ] Task: Implement the "Detail View" (sidebar or floating tooltip) to display all metadata fields.
-- [ ] Task: Implement responsive design and collapsible node groups (if applicable to current graph depth).
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
+- [x] Task: Integrate API calls to fetch node metadata on hover or click. [d038535]
+- [x] Task: Implement the "Detail View" (sidebar or floating tooltip) to display all metadata fields. [d038535]
+- [x] Task: Implement responsive design and collapsible node groups (if applicable to current graph depth). [d038535]
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
 
 ## Phase 5: Final Refinement & Acceptance
 Polishing the experience and verifying against the spec.
