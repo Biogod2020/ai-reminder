@@ -8,4 +8,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    watch: {
+      usePolling: true, // 强制轮询文件系统，防止缓存
+    },
+    hmr: {
+      overlay: true,
+    }
+  },
+  optimizeDeps: {
+    force: true, // 强制重新构建依赖缓存
+  }
 })

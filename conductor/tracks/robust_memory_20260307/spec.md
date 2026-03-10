@@ -1,50 +1,37 @@
-# Specification: Robust Memory & Initialization Q&A (Track: robust_memory_20260307)
+# Specification: Multimodal Truth Engine (Track: knowledge_c_integration_20260307)
 
 ## Overview
-This track implements a robust, SOTA memory system for the Notion-Soul-Agent using a custom SQLite-based management system. It introduces an interactive "Initialization" Q&A session to capture user preferences and habits, ensures all agent nodes have shared global memory access, and implements a multi-tier "Time-Pyramid" memory consolidation system to synthesize raw behavioral data into long-term habits.
+This track implements a high-fidelity behavioral "Truth Engine" by merging macOS `knowledgeC.db` duration data with high-frequency visual streams (15s screenshots). Every 30 minutes, these data sources are synthesized by Gemini 3.1 Flash-Lite to reconstruct an objective, context-aware timeline of user activity.
 
 ## Goals
-- Implement a hierarchical memory structure: **Short-term** (current task/context) and **Long-term** (habits, goals, persistent user "Soul").
-- Develop an "Initialization" Q&A module to bootstrap the user's "Soul" profile.
-- Integrate macOS system metrics (Daily/Weekly/Monthly) to trigger automatic memory updates.
-- **Memory Consolidation:** Implement a tiered compression mechanism (Daily -> 3-Day -> Weekly -> Monthly -> Yearly) to refine raw behavioral data into high-signal insights.
-- **macOS System Integration Research:** Investigate the `knowledgeC.db` (macOS Screen Time database) to extract high-fidelity application usage and focus metrics.
-- Ensure all agent nodes (Atomizer, Nudger, etc.) have access to a **Shared Global Memory**.
-- Stress test the memory engine for performance, concurrency, and temporal accuracy.
+- **High-Frequency Perception:** Capture full-screen snapshots every 15 seconds to eliminate "semantic blind spots."
+- **Multimodal Synthesis:** Merge exact app durations from `knowledgeC.db` with the visual context of the screen.
+- **SOTA Behavioral Categorization:** Classify time slices into `Work`, `Leisure`, `Utility`, or `Away` with scientific reasoning.
+- **Selective Memory:** Allow for the retention of "Key Moments" (screenshots) while managing automated cleanup for the rest.
 
 ## Functional Requirements
-1. **Initialization Q&A:**
-   - Interactive CLI/Web session to capture circadian rhythm, work preferences, and goals.
-   - Initial population of `user_soul.md` and the SQLite database.
-2. **Hierarchical Memory Management:**
-   - **Short-term Memory:** Session-based, task-specific context (e.g., active App monitoring).
-   - **Long-term Memory:** Persistent storage of user habits, preferences, and long-term goals.
-3. **Automatic Update Engine & Consolidation:**
-   - Monitor macOS system events for active app tracking.
-   - **Daily Maintenance (6 AM):** Summarize past 24h raw data into a "Daily Insight".
-   - **Multi-tier Compression:** 
-     - 3-Day summary (every 3 days).
-     - Weekly summary (every Monday).
-     - Monthly summary (1st of the month).
-     - Quarterly/Yearly summaries for deep long-term drift detection.
-   - All summaries must be backed up in `user_soul.md` while keeping the "Active Soul" model lean.
-4. **Shared Global Access:**
-   - Unified API for all agent nodes to query and store memories.
-   - Contextual injection into all AI generations (top relevant facts).
-5. **Stress Test Suite:**
-   - Volume and concurrency verification for the SQLite engine.
+1. **High-Frequency Sampler:**
+   - Capture 1 screenshot every 15s (configurable).
+   - No automatic filtering (full transparency as requested).
+   - Store locally in a temporary `captures/` directory.
+2. **Grand Synthesis (30-min Window):**
+   - Every 30 minutes, bundle ~120 images + the corresponding `knowledgeC.db` timeline.
+   - **SOTA Prompting:** Instruct Gemini to act as a "High-Performance Execution Coach."
+   - **Output Format:** A structured timeline merging App Names + Visual Actions + Category + Cognitive Load Score.
+3. **Selective Retention & Cleanup:**
+   - AI identifies "Key Snapshots" (e.g., a complex architecture diagram or a significant milestone).
+   - These key images are moved to a `soul_gallery/` for user review.
+   - All other raw images in `captures/` are queued for deletion after summarization (User-optional/Selective).
+4. **Context Injection:**
+   - Final summarized timelines are injected into the agent nodes' context.
 
 ## Non-Functional Requirements
-- **Robustness:** 100% success rate for local proxy calls via deep monkeypatching/httpx fallback.
-- **Performance:** Memory retrieval latency < 50ms.
-- **Privacy:** Local-First storage.
+- **Performance:** Image processing (scaling/grayscaling) to keep payload sizes manageable for the API.
+- **Robustness:** Handle "Database Locked" errors via temporary SQLite copies.
+- **AI Model:** Exclusively use Gemini 3.1+ for its 1M context and multimodal excellence.
 
 ## Acceptance Criteria
-- [x] Initialization Q&A successfully populates the `user_soul.md` and database.
-- [x] All agent nodes retrieve relevant user context for generations.
-- [ ] Memory consolidator successfully runs at 6 AM and generates hierarchical summaries.
-- [ ] Active memory remains lean by deactivating older raw data while preserving summaries.
-- [x] Stress tests pass with sub-millisecond local DB latency.
-
-## Out of Scope
-- Cloud-based memory synchronization.
+- [ ] 15s sampler runs stably in the background.
+- [ ] 30-min batch successfully generates a merged timeline summary.
+- [ ] UI/Prompt allows user to selectively destroy or keep screenshots.
+- [ ] Daily summary includes "Deep Flow" and "Context Switch" analysis.

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSA Architecture V2 | Immersive Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f6f3; color: #37352f; overflow: hidden; }
+        
+        /* Tooltip Styling */
+        #floating-tooltip {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            width: 340px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        #floating-tooltip.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #mermaid-root {
+            width: 100vw;
+            height: calc(100vh - 64px);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        #mermaid-root:active { cursor: grabbing; }
+
+        .mermaid {
+            transform-origin: center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .badge { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 4px; }
+        .badge-in { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-out { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .badge-logic { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
+        
+        /* Node Hover Effect in SVG */
+        .node:hover rect, .node:hover circle, .node:hover polygon {
+            stroke: #2383e2 !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 12px rgba(35, 131, 226, 0.5));
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid #e9e9e7;
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #787774;
+            transition: background 0.2s;
+        }
+        .control-btn:hover { background: #f1f1f0; color: #37352f; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="h-16 bg-white/80 backdrop-blur-md border-b border-[#e9e9e7] px-8 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-[#2383e2] rounded-lg flex items-center justify-center">
+                <i class="fas fa-ghost text-white text-sm"></i>
+            </div>
+            <h1 class="font-black text-xs uppercase tracking-[0.3em]">Notion Soul Agent</h1>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="text-[10px] font-bold text-[#9b9b9b] uppercase tracking-widest">V2: IMMERSIVE ZOOM & HOVER</div>
+            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 px-2 py-1 rounded">PRO LEVEL VISUALS</span>
+        </div>
+    </nav>
+
+    <!-- Immersive Diagram Area -->
+    <main class="relative flex-1 bg-white overflow-hidden">
+        <div id="mermaid-root">
+            <div class="mermaid" id="mermaid-svg-container">
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#e9e9e7', 'lineColor': '#9b9b9b', 'fontFamily': 'sans-serif'}}}%%
+graph TD
+    classDef user focus fill:#2383e2,stroke:#1a65b0,stroke-width:2px,color:#fff,rx:8px,ry:8px;
+    classDef node fill:#fff,stroke:#e9e9e7,stroke-width:2px,color:#37352f,rx:8px,ry:8px;
+    classDef model fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e,rx:8px,ry:8px,stroke-dasharray: 5 5;
+    classDef db fill:#f3f4f6,stroke:#d1d5db,stroke-width:2px,color:#374151,rx:4px,ry:4px,shape:cylinder;
+    classDef system fill:#eff6ff,stroke:#93c5fd,stroke-width:2px,color:#1e3a8a,rx:8px,ry:8px;
+
+    User[User Input / Dashboard]:::user
+
+    subgraph "SoulOrchestrator (LangGraph)"
+        Classify["classify (Node)"]:::node
+        HandleTask["handle_task (Node)"]:::node
+        HandleMemory["handle_memory (Node)"]:::node
+        HandlePlanner["handle_planner (Node)"]:::node
+        HandleClarify["handle_clarify (Node)"]:::node
+        AwaitApproval["await_approval (Node)"]:::node
+        Notify["notify (Node)"]:::node
+        End((END)):::node
+
+        Classify -- "intent=='task'" --> HandleTask
+        Classify -- "intent=='memory'" --> HandleMemory
+        Classify -- "intent=='planner'" --> HandlePlanner
+        Classify -- "intent=='clarify'" --> HandleClarify
+        
+        HandleTask --> AwaitApproval
+        HandlePlanner --> AwaitApproval
+        HandleMemory --> Notify
+        
+        HandleClarify --> End
+        AwaitApproval --> End
+        Notify --> End
+    end
+
+    subgraph "Heartbeat & API"
+        Nudge["evaluate_nudge (Heartbeat)"]:::system
+        View["get_optimized_view (API)"]:::system
+    end
+
+    subgraph "Perception & Synthesis"
+        VisSampler["VisualSampler"]:::system
+        SysDB["KnowledgeDB"]:::db
+        SynEngine["BehaviorSynthesisEngine"]:::system
+        GeminiVision{"Gemini 3.1 (Vision)"}:::model
+        TruthMerger["DualAxisMerger"]:::system
+    end
+
+    subgraph "Memory & Storage"
+        SqliteDB[("notion_soul.db")]:::db
+        TasksDB[("Tasks [UT] Table")]:::db
+        MemConsol["MemoryConsolidator"]:::system
+        UserSoul["user_soul.md"]:::db
+    end
+
+    User --> Classify
+    VisSampler --> SynEngine
+    SysDB --> SynEngine
+    SynEngine --> GeminiVision
+    GeminiVision --> TruthMerger
+    SysDB --> TruthMerger
+    TruthMerger --> SqliteDB
+    
+    SqliteDB --> MemConsol
+    MemConsol --> UserSoul
+    
+    UserSoul -.->|Read| Classify
+    UserSoul -.->|Read| HandleTask
+    
+    HandleTask -.->|Write| TasksDB
+    HandlePlanner -.->|Read/Write| TasksDB
+    HandleMemory -.->|Write| SqliteDB
+    
+    Classify -.->|Read| TasksDB
+    Nudge -.->|Read| TasksDB
+    View -.->|Read| TasksDB
+            </div>
+        </div>
+
+        <div id="controls">
+            <button class="control-btn" id="zoom-in" title="Zoom In"><i class="fas fa-plus text-xs"></i></button>
+            <button class="control-btn" id="zoom-out" title="Zoom Out"><i class="fas fa-minus text-xs"></i></button>
+            <button class="control-btn" id="zoom-reset" title="Reset View"><i class="fas fa-expand text-xs"></i></button>
+        </div>
+
+        <!-- Floating Tooltip -->
+        <div id="floating-tooltip" class="bg-white border border-[#e9e9e7] rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-start">
+                <h3 id="tooltip-title" class="text-lg font-bold text-[#37352f]">Node Title</h3>
+                <span id="tooltip-badge" class="badge badge-logic">Category</span>
+            </div>
+            <p id="tooltip-desc" class="text-xs leading-relaxed text-[#787774]">Description.</p>
+            <div id="tooltip-io" class="grid grid-cols-2 gap-4 pt-2">
+                <div>
+                    <span class="badge badge-in mb-2 block w-fit">Input</span>
+                    <ul id="tooltip-input" class="text-[10px] font-semibold space-y-1"></ul>
+                </div>
+                <div>
+                    <span class="badge badge-out mb-2 block w-fit">Output</span>
+                    <ul id="tooltip-output" class="text-[10px] font-semibold space-y-1 text-green-700"></ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Data Store -->
+    <div id="node-data-store" class="hidden">
+        <div data-name="User" data-cat="Client" data-desc="The entry point for natural language requests and behavioral feedback. Triggers the Orchestrator loop via API." data-in="• User Query|• UI Actions" data-out="• API Trigger"></div>
+        <div data-name="classify" data-cat="AI Node" data-desc="Uses global context (Memory + Current Tasks) to route user intent to specialized handlers." data-in="• user_input (str)|• global_context" data-out="• intent (str)"></div>
+        <div data-name="handle_task" data-cat="AI Node" data-desc="Decomposes goals into atomic subtasks using ADaPT. Persists task tree to SQLite with 'pending' sync status." data-in="• user_input|• habit_context" data-out="• Subtask Tree|• Logic Narrative"></div>
+        <div data-name="handle_memory" data-cat="AI Node" data-desc="Extracts durable facts or habits. Updates the internal SQLite 'user_soul' table and triggers long-term memory sync." data-in="• user_input" data-out="• Soul Fact (DB)"></div>
+        <div data-name="handle_planner" data-cat="AI Node" data-desc="Analyzes schedule density and cognitive load to propose optimized re-planning of tasks." data-in="• Tasks [UT]|• Load Metrics" data-out="• Proposed Plan"></div>
+        <div data-name="handle_clarify" data-cat="AI Node" data-desc="Generated MCQ (Minimal Clarification Questions) when intent confidence is low (< 0.8)." data-in="• vague_input" data-out="• Clarification MCQ"></div>
+        <div data-name="await_approval" data-cat="Wait State" data-desc="Suspends graph execution until user explicitly approves proposed tasks or schedule changes." data-in="• proposed_actions" data-out="• User Signal"></div>
+        <div data-name="notify" data-cat="Action" data-desc="Dispatches macOS native notifications or Bark push alerts for completed syncs or critical nudges." data-in="• notify_payload" data-out="• OS Alert / Push"></div>
+        <div data-name="evaluate_nudge" data-cat="Proactive" data-desc="Async loop that monitors 'in_progress' tasks. If duration exceeds estimate, triggers empathy-based nudge." data-in="• Task Status|• Time Elapsed" data-out="• Nudge Decision"></div>
+        <div data-name="get_optimized_view" data-cat="API" data-desc="FastAPI endpoint that serves scientifically interleaved tasks (Hard/Soft interleaving) to the UI." data-in="• Tasks [UT]" data-out="• View JSON"></div>
+        <div data-name="VisualSampler" data-cat="System" data-desc="Captures 15s interval Retina screenshots. Processes RGBA to RGB and compresses to JPEG 85 quality." data-in="• Retina Screen" data-out="• JPEG Frame"></div>
+        <div data-name="KnowledgeDB" data-cat="System DB" data-desc="Direct interface to macOS knowledgeC.db. Extracts ZOBJECT and ZSTRUCTUREDINSTANCE for app timelines." data-in="• SQLite Binary" data-out="• App Timeline"></div>
+        <div data-name="BehaviorSynthesisEngine" data-cat="Core Logic" data-desc="Orchestrates Dual-Axis truth. Feeds image batches to Gemini and merges results with system logs." data-in="• Image Batch|• App Timeline" data-out="• Behavior Truth"></div>
+        <div data-name="Gemini" data-cat="VLM" data-desc="Analyzes visual frames to determine semantic intent, focus scores, and identifies key moments." data-in="• Frames + Prompts" data-out="• Intent Axis"></div>
+        <div data-name="DualAxisMerger" data-cat="Algorithm" data-desc="Aligns asynchronous visual points with system duration blocks. Implements temporal gap-filling logic." data-in="• System Axis|• AI Axis" data-out="• Merged Omni Log"></div>
+        <div data-name="notion_soul.db" data-cat="Database" data-desc="Primary SQLite storage with WAL enabled. Stores omni_behavior_log, tasks, and user_soul state." data-in="• Raw Logs" data-out="• Structured Data"></div>
+        <div data-name="Tasks" data-cat="Logic DB" data-desc="Database view of all scheduled work. Tracked via 'sync_status' for eventual write-back to Notion." data-in="• Proposed Steps" data-out="• Scheduled Work"></div>
+        <div data-name="MemoryConsolidator" data-cat="Agent" data-desc="Distills daily raw logs into habit summaries. Compresses Time-Pyramid (1D -> 3D -> 7D -> 30D)." data-in="• Omni Logs" data-out="• Summaries"></div>
+        <div data-name="user_soul" data-cat="Context" data-desc="The Markdown 'Brain' of the user. Read as 1M context injection for every AI decision." data-in="• Summaries" data-out="• 1M Context"></div>
+        <div data-name="END" data-cat="Terminal" data-desc="The terminal state of the SoulOrchestrator graph. Indicates completion of the current processing turn." data-in="None" data-out="None"></div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('mermaid-root');
+            const target = document.querySelector('.mermaid');
+            const tooltip = document.getElementById('floating-tooltip');
+            const dataStore = document.getElementById('node-data-store');
+            
+            let scale = 1.2;
+            let translateX = 0;
+            let translateY = 0;
+            let isDragging = false;
+            let startX, startY;
+
+            const updateTransform = () => {
+                target.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            };
+
+            updateTransform();
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                scale = Math.min(Math.max(0.2, scale * delta), 5);
+                updateTransform();
+            }, { passive: false });
+
+            container.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.node')) return; // Allow interaction with nodes
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                container.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                container.style.cursor = 'grab';
+            });
+
+            document.getElementById('zoom-in').onclick = () => { scale *= 1.2; updateTransform(); };
+            document.getElementById('zoom-out').onclick = () => { scale *= 0.8; updateTransform(); };
+            document.getElementById('zoom-reset').onclick = () => { scale = 1.2; translateX = 0; translateY = 0; updateTransform(); };
+
+            const showTooltip = (label, x, y) => {
+                const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const rawLabel = label.toLowerCase();
+                const term = normalize(label.split('(')[0].split(' ')[0]);
+
+                const entries = Array.from(dataStore.children);
+                let data = entries.find(e => {
+                    const name = e.getAttribute('data-name').toLowerCase();
+                    if (term === 'user') {
+                        if (rawLabel.includes('soul')) return name.includes('soul');
+                        if (rawLabel.includes('input')) return name === 'user';
+                    }
+                    return name.includes(term) || term.includes(name);
+                });
+
+                if (data) {
+                    document.getElementById('tooltip-title').innerText = data.getAttribute('data-name');
+                    document.getElementById('tooltip-badge').innerText = data.getAttribute('data-cat');
+                    document.getElementById('tooltip-desc').innerText = data.getAttribute('data-desc');
+                    
+                    const inputs = data.getAttribute('data-in').split('|').map(i => `<li>${i}</li>`).join('');
+                    const outputs = data.getAttribute('data-out').split('|').map(o => `<li>${o}</li>`).join('');
+                    
+                    document.getElementById('tooltip-input').innerHTML = inputs;
+                    document.getElementById('tooltip-output').innerHTML = outputs;
+
+                    const padding = 20;
+                    let posX = x + padding;
+                    let posY = y + padding;
+
+                    if (posX + tooltip.offsetWidth > window.innerWidth) posX = x - tooltip.offsetWidth - padding;
+                    if (posY + tooltip.offsetHeight > window.innerHeight) posY = y - tooltip.offsetHeight - padding;
+
+                    tooltip.style.left = `${posX}px`;
+                    tooltip.style.top = `${posY}px`;
+                    tooltip.classList.add('visible');
+                }
+            };
+
+            const hideTooltip = () => tooltip.classList.remove('visible');
+
+            const observer = new MutationObserver(() => {
+                const nodes = document.querySelectorAll('.node');
+                nodes.forEach(node => {
+                    node.addEventListener('mouseenter', (e) => {
+                        const labelEl = node.querySelector('.nodeLabel');
+                        if (labelEl) showTooltip(labelEl.innerText, e.clientX, e.clientY);
+                    });
+                    node.addEventListener('mousemove', (e) => {
+                        const labelEl = node.querySelector('.nodeLabel');
+                        if (labelEl && tooltip.classList.contains('visible')) {
+                            showTooltip(labelEl.innerText, e.clientX, e.clientY);
+                        }
+                    });
+                    node.addEventListener('mouseleave', hideTooltip);
+                });
+            });
+
+            observer.observe(document.querySelector('.mermaid'), { childList: true, subtree: true });
+        });
+    </script>
+</body>
+</html>

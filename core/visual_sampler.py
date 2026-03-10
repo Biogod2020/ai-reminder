@@ -45,17 +45,18 @@ class VisualSampler:
             
             # 2. Process with Pillow
             with Image.open(raw_path) as img:
-                # Resize to a manageable width for Gemini (e.g., 1024px)
-                # while maintaining aspect ratio
-                base_width = 1024
-                w_percent = (base_width / float(img.size[0]))
-                h_size = int((float(img.size[1]) * float(w_percent)))
-                img = img.resize((base_width, h_size), Image.Resampling.LANCZOS)
+                # Use scale-based sampling (70% of original) instead of fixed width
+                # This preserves Retina density and text clarity
+                scale_factor = 0.7
+                new_size = (int(img.size[0] * scale_factor), int(img.size[1] * scale_factor))
+                img = img.resize(new_size, Image.Resampling.LANCZOS)
                 
-                # Convert to Grayscale to save space/bandwidth if needed
-                # (Optional: User requested high signal, so we can keep RGB or use Grayscale)
-                # Let's use RGB but high compression for now.
-                img.save(proc_path, "JPEG", quality=60)
+                # Ensure RGB mode for JPEG compatibility (fixes RGBA error)
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+                
+                # Higher quality (85) for better text OCR by Gemini
+                img.save(proc_path, "JPEG", quality=85)
             
             # 3. Cleanup raw
             os.remove(raw_path)

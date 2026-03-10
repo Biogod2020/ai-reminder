@@ -49,6 +49,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Architecture Visualization & Node Database Improvement**
+- [~] **Track: Architecture Visualization & Node Database Improvement**
 *Link: [./tracks/architecture_db_viz_20260310/](./tracks/architecture_db_viz_20260310/)*
 
