@@ -38,3 +38,18 @@ class UserSoul(Base):
     value: Mapped[str] = mapped_column(String(1024))
     category: Mapped[str] = mapped_column(String(50))
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+class VizMetadata(Base):
+    """SQLAlchemy model representing metadata for architecture visualization nodes."""
+    __tablename__ = 'viz_metadata'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    node_id: Mapped[str] = mapped_column(String(100), unique=True)
+    role: Mapped[str] = mapped_column(String(100))
+    description: Mapped[str] = mapped_column(String(1024))
+    code_mapping: Mapped[str] = mapped_column(String(255))
+    io_schema: Mapped[str] = mapped_column(String(1024))  # Store as JSON string
+    load_metrics: Mapped[str] = mapped_column(String(255)) # Store as JSON string or key-value
+    metadata_json: Mapped[str] = mapped_column(String(1024), default='{}')
+
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

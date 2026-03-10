@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from langfuse import Langfuse, observe
 from core.adapter import GeminiAdapter
 from core.memory import SoulMemory
-from core.models import Base, Task, UserSoul
+from core.models import Base, Task, UserSoul, VizMetadata
 from core.notifier import Notifier
 
 class AgentState(TypedDict):
