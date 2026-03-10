@@ -8,11 +8,15 @@ An autonomous, multi-modal task scheduling assistant built with **Gemini 3.1 Fla
 - **Proactive Nudges:** Active macOS notifications to keep you on track.
 - **Digital Soul Memory:** Local-first preference and habit learning.
 
-## Interactive Architecture Engine
-The project features a data-driven, interactive visualization of its internal cognitive state machine. 
-- **View:** Navigate to the **Architecture** tab in the dashboard.
-- **Interact:** Zoom, pan, and click on nodes to see detailed descriptions, implementation paths, and I/O schemas.
-- **Backend:** Powered by a local SQLite metadata store and FastAPI.
+## Standalone Architecture Engine
+The project features a dedicated, data-driven visualization tool for its internal cognitive state machine.
+
+- **Viewer:** Open `docs/interactive_viz.html` directly in your browser.
+- **Sync:** To update the visualization after adding new nodes to the code, run:
+  ```bash
+  PYTHONPATH=. ./.venv/bin/python3 scripts/sync_viz_metadata.py
+  ```
+- **Backend:** Ensure the FastAPI server is running (`python core/api.py`) to fetch detailed node metadata.
 
 ## Tech Stack
 - **Backend:** Python 3.11+, FastAPI, SQLAlchemy, LangGraph.

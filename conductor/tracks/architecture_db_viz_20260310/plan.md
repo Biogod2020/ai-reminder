@@ -1,41 +1,26 @@
-# Implementation Plan: Architecture Visualization & Node Database (architecture_db_viz_20260310)
+# Implementation Plan: Standalone Architecture Visualization Tool (architecture_db_viz_20260310)
 
-## Phase 1: Database Schema & Data Ingestion [checkpoint: 27dffcc]
-This phase focuses on setting up the persistence layer for node metadata and populating it.
+## Phase 1: Reversion & Standalone Setup
+Clean up the main UI and prepare the independent environment.
 
-- [x] Task: Define `viz_metadata` table schema in `core/system_db.py` or a new migrations script. [85fd361]
-- [x] Task: Implement a utility script `scripts/sync_viz_metadata.py` to parse current LangGraph nodes and existing docs to seed the DB. [8acbca2]
-- [x] Task: Write tests for database operations (CRUD for node metadata). [d412f8c]
-- [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Data Ingestion' (Protocol in workflow.md)
+- [ ] Task: Revert `frontend/src/App.tsx` to remove the Architecture tab and related state.
+- [ ] Task: Configure a standalone entry point for the visualization (e.g., `frontend/viz.html` or a dedicated Vite configuration).
+- [ ] Task: Move `ArchitectureDashboard.tsx` logic to the standalone viewer.
 
-## Phase 2: Metadata API & Backend Integration [checkpoint: 1b10955]
-Expose the metadata via FastAPI to the frontend.
+## Phase 2: LangGraph Data Extraction
+Automate the "Code -> DB" pipeline using LangGraph internals.
 
-- [x] Task: Add a new FastAPI endpoint `/api/v1/viz/nodes/{node_id}` to retrieve metadata. [0cc51de]
-- [x] Task: Add a bulk endpoint `/api/v1/viz/nodes` for the initial graph load. [0cc51de]
-- [x] Task: Write integration tests for the new API endpoints. [0cc51de]
-- [x] Task: Conductor - User Manual Verification 'Phase 2: Metadata API & Backend Integration' (Protocol in workflow.md)
+- [ ] Task: Refactor `scripts/sync_viz_metadata.py` to instantiate the Orchestrator and use `orchestrator.graph.get_graph()` to extract nodes/edges.
+- [ ] Task: Ensure dynamic extraction handles new nodes automatically.
+- [ ] Task: Verify sync script successfully updates `notion_soul.db`.
 
-## Phase 3: Frontend Scaffolding & Visualization Research [checkpoint: 5e85fcb]
-Select and set up the visualization library.
+## Phase 3: Interactive HTML Development
+Finalize the standalone viewing experience.
 
-- [x] Task: Research and select a visualization library (e.g., React Flow, Cytoscape.js, or LangGraph-native exports) that supports zoom/pan and custom overlays. [3ee1740]
-- [x] Task: Create a new frontend component `ArchitectureDashboard.tsx` or similar. [7171c4d]
-- [x] Task: Implement the base graph layout with zoom and pan capabilities. [5edaa1e]
-- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
+- [ ] Task: Ensure the standalone HTML tool can communicate with the FastAPI backend.
+- [ ] Task: Implement a "Single-File Export" mode or a lightweight distribution method for the visualization.
+- [ ] Task: Verify interactivity (zoom, pan, click for details) in the standalone tool.
 
-## Phase 4: Data-Driven Interactive UI [checkpoint: ee53fc0]
-Connect the frontend to the backend and add interactivity.
-
-- [x] Task: Integrate API calls to fetch node metadata on hover or click. [d038535]
-- [x] Task: Implement the "Detail View" (sidebar or floating tooltip) to display all metadata fields. [d038535]
-- [x] Task: Implement responsive design and collapsible node groups (if applicable to current graph depth). [d038535]
-- [x] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
-
-## Phase 5: Final Refinement & Acceptance [checkpoint: b43eb7f]
-Polishing the experience and verifying against the spec.
-
-- [x] Task: Verify that every node in the graph has complete and accurate hover information. [ee53fc0]
-- [x] Task: Optimize rendering performance for the canvas. [ee53fc0]
-- [x] Task: Update the project's README or docs to point to the new interactive architecture view. [adb263f]
-- [x] Task: Conductor - User Manual Verification 'Phase 5: Final Refinement & Acceptance' (Protocol in workflow.md)
+## Phase 4: Final Refinement
+- [ ] Task: Update documentation to explain how to access and update the standalone visualization tool.
+- [ ] Task: Conductor - User Manual Verification 'Final Acceptance'
