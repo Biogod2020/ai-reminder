@@ -24,18 +24,18 @@ Select and set up the visualization library.
 - [x] Task: Implement the base graph layout with zoom and pan capabilities. [5edaa1e]
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Scaffolding & Visualization Research' (Protocol in workflow.md)
 
-## Phase 4: Data-Driven Interactive UI
+## Phase 4: Data-Driven Interactive UI [checkpoint: ee53fc0]
 Connect the frontend to the backend and add interactivity.
 
 - [x] Task: Integrate API calls to fetch node metadata on hover or click. [d038535]
 - [x] Task: Implement the "Detail View" (sidebar or floating tooltip) to display all metadata fields. [d038535]
 - [x] Task: Implement responsive design and collapsible node groups (if applicable to current graph depth). [d038535]
-- [~] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Data-Driven Interactive UI' (Protocol in workflow.md)
 
 ## Phase 5: Final Refinement & Acceptance
 Polishing the experience and verifying against the spec.
 
-- [ ] Task: Verify that every node in the graph has complete and accurate hover information.
+- [~] Task: Verify that every node in the graph has complete and accurate hover information.
 - [ ] Task: Optimize rendering performance for the canvas.
 - [ ] Task: Update the project's README or docs to point to the new interactive architecture view.
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: Final Refinement & Acceptance' (Protocol in workflow.md)
