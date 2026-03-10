@@ -36,6 +36,9 @@ Notion-Soul-Agent (NSA) 是一个**本地优先 (Local-First)**、具备“生�
 - **叙事化微奖励 (Narrative Micro-Rewards):**
     - **叙事重构：** Gemini 自动将枯燥任务重构为带有趣味性或成就感的短语。
     - **即时反馈：** 在通知中即时反馈“连击 (Streak)”与“经验 (XP)”。
+- **交互式架构引擎 (Interactive Architecture Engine):**
+    - **动态可视化：** 数据驱动的 LangGraph 状态机可视化，集成于 Dashboard。
+    - **深度透明：** 点击节点可即时获取描述、I/O Schema 及代码映射，增强系统透明度。
 
 ## 4. 未来规划 (Future Roadmap - Plugins & Modules)
 核心功能验证成功后，将作为“计算增强插件”逐步加入：

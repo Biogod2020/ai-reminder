@@ -7,7 +7,9 @@
 - **React + Vite (Frontend Core):** 
     - 构建响应式、高像素完美的“类 Notion”界面。
     - **Vite:** 确保极速的热重载与构建性能。
-    - **Libraries:** \`recharts\` (数据可视化), \`framer-motion\` (动画), \`lucide-react\` (图标)。
+    - **Visualization:** `@xyflow/react` (React Flow) for graph rendering, `dagre` for auto-layout.
+    - **Libraries:** `recharts` (数据可视化), `framer-motion` (动画), `lucide-react` (图标)。
+
 - **Electron (Mac Container):** 
     - 为 macOS 提供原生外壳，支持菜单栏 (Tray)、系统通知及磨砂玻璃效果。
 - **Capacitor (Mobile Bridge):** 
