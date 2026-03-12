@@ -259,50 +259,36 @@
         }
 
         function showTooltip(label, x, y) {
-            // Normalize label for matching (e.g., "classify (Node)" -> "classify")
             const rawLabel = label.split('(')[0].trim();
             const term = rawLabel.toLowerCase().replace(/[^a-z0-9_]/g, '');
             
-            // Support matching both node_id and external names
             let node = nodesMetadata.find(n => {
                 const id = n.node_id.toLowerCase();
-                // Match exact normalized ID, or check if normalized label contains ID or vice versa
                 return id === term || id.includes(term) || term.includes(id);
             });
             
-            // Hardcoded fallback for specialized UI elements or missing mappings
-            if (!node) {
-                if (term.includes('userinput') || term === 'user') {
-                    node = {
-                        node_id: 'USER',
-                        role: 'CLIENT',
-                        description: 'The primary interface for natural language interaction and system control.',
-                        code_mapping: 'frontend/src/App.tsx',
-                        io_schema: { type: 'User Query', output: 'API Request' }
-                    };
-                } else if (term.includes('notionsouldb')) {
-                    node = nodesMetadata.find(n => n.node_id === 'SqliteDB');
-                } else if (term.includes('tasksuttable')) {
-                    node = nodesMetadata.find(n => n.node_id === 'TasksDB');
-                } else if (term.includes('memoryconsolidator')) {
-                    node = nodesMetadata.find(n => n.node_id === 'MemConsol');
-                } else if (term.includes('gemini31vision')) {
-                    node = nodesMetadata.find(n => n.node_id === 'GeminiVision');
-                }
+            if (!node && term === 'user') {
+                node = {
+                    node_id: 'USER', role: 'CLIENT',
+                    description: 'Primary interface for input/control.',
+                    code_mapping: 'frontend/src/App.tsx',
+                    io_schema: { input: 'User Query', output: 'API Request' }
+                };
             }
 
-            if (!node) {
-                console.warn("No metadata match for label:", label, " (normalized term:", term, ")");
-                return;
-            }
+            if (!node) return;
 
             document.getElementById('tooltip-title').innerText = node.node_id.replace(/_/g, ' ').toUpperCase();
             document.getElementById('tooltip-badge').innerText = node.role;
             document.getElementById('tooltip-desc').innerText = node.description;
             document.getElementById('tooltip-code').innerText = node.code_mapping;
             
-            document.getElementById('tooltip-input').innerHTML = `<li>• ${node.io_schema.type || node.io_schema.input || 'AgentState'}</li>`;
-            document.getElementById('tooltip-output').innerHTML = `<li>• ${node.io_schema.output || 'AgentState'}</li>`;
+            // Extract Read/Write from io_schema or load_metrics
+            const reads = node.load_metrics?.reads || [node.io_schema.input || 'AgentState'];
+            const writes = node.load_metrics?.writes || [node.io_schema.output || 'AgentState'];
+
+            document.getElementById('tooltip-input').innerHTML = reads.map(r => `<li>• ${r}</li>`).join('');
+            document.getElementById('tooltip-output').innerHTML = writes.map(w => `<li class="text-blue-600">• ${w}</li>`).join('');
 
             positionTooltip(x, y);
             tooltip.classList.add('visible');
