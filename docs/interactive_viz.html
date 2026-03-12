@@ -3,125 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notion Soul Agent - Interactive Architecture</title>
-    <!-- Tailwind for styling -->
+    <title>NSA Architecture V3 | Immersive & Live</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide for icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f6f3; color: #37352f; overflow: hidden; }
         
-        .sidebar {
-            transition: transform 0.3s ease-in-out;
+        /* Floating Tooltip (V2 Visuals) */
+        #floating-tooltip {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            width: 360px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-        .sidebar.closed {
-            transform: translateX(100%);
+        #floating-tooltip.visible {
+            opacity: 1;
+            transform: scale(1);
         }
-        
-        /* Mermaid Styling Overrides */
-        .mermaid {
-            width: 100%;
-            height: 100%;
+
+        #mermaid-root {
+            width: 100vw;
+            height: calc(100vh - 64px);
+            cursor: grab;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 40px 40px;
         }
-        .node rect, .node circle, .node ellipse, .node polygon, .node path {
-            fill: #ffffff !important;
-            stroke: #e9e9e7 !important;
-            stroke-width: 2px !important;
-            transition: all 0.2s ease;
+        #mermaid-root:active { cursor: grabbing; }
+
+        .mermaid-container {
+            transform-origin: center;
+            transition: transform 0.1s ease-out;
         }
+
+        /* Badge Styling (Ported from V2) */
+        .badge { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 4px; }
+        .badge-in { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-out { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .badge-logic { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
+        
+        /* Node Hover Effect */
         .node:hover rect, .node:hover circle, .node:hover ellipse, .node:hover polygon, .node:hover path {
             stroke: #2383e2 !important;
-            filter: drop-shadow(0 4px 6px rgba(35, 131, 226, 0.1));
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 12px rgba(35, 131, 226, 0.5));
             cursor: pointer;
         }
-        .node .label {
-            font-family: 'Inter', sans-serif !important;
-            font-weight: 600 !important;
-            fill: #37352f !important;
+
+        #controls {
+            position: fixed; bottom: 24px; right: 24px;
+            background: white; padding: 8px; border-radius: 12px;
+            border: 1px solid #e9e9e7; display: flex; gap: 8px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        .edgePath path {
-            stroke: #e9e9e7 !important;
-            stroke-width: 2px !important;
+        .control-btn {
+            width: 32px; height: 32px; display: flex;
+            align-items: center; justify-content: center;
+            border-radius: 8px; color: #787774; transition: background 0.2s;
         }
-        .edgeLabel {
-            background-color: #f7f6f3 !important;
-            font-family: 'Inter', sans-serif !important;
-            font-size: 10px !important;
-            color: #787774 !important;
+        .control-btn:hover { background: #f1f1f0; color: #37352f; }
+
+        #loader-overlay {
+            position: absolute; inset: 0; background: rgba(247, 246, 243, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; transition: opacity 0.5s ease;
         }
     </style>
 </head>
-<body class="bg-[#f7f6f3] text-[#37352f] h-screen flex flex-col overflow-hidden">
-
-    <!-- Header -->
-    <header class="px-8 py-5 border-b border-[#e9e9e7] bg-white flex items-center justify-between z-10 shrink-0">
-        <div>
-            <div class="flex items-center gap-3 mb-1">
-                <div class="w-6 h-6 bg-[#2383e2] rounded-md flex items-center justify-center">
-                    <i data-lucide="network" class="text-white w-4 h-4"></i>
-                </div>
-                <h1 class="text-xl font-black tracking-tight uppercase">Architecture Engine</h1>
+<body class="min-h-screen flex flex-col">
+    <!-- Immersive Nav -->
+    <nav class="h-16 bg-white/80 backdrop-blur-md border-b border-[#e9e9e7] px-8 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-[#2383e2] rounded-lg flex items-center justify-center">
+                <i class="fas fa-ghost text-white text-sm"></i>
             </div>
-            <p class="text-xs text-[#787774] font-medium uppercase tracking-widest">Interactive LangGraph Visualization</p>
+            <h1 class="font-black text-xs uppercase tracking-[0.3em]">Notion Soul Agent</h1>
         </div>
-        <div class="flex items-center gap-4">
-            <div class="px-3 py-1.5 rounded-full bg-[#f7f6f3] text-[10px] font-bold text-[#787774] border border-[#e9e9e7] flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                LIVE CORE CONNECTED
+        <div class="flex items-center gap-6">
+            <div id="status-chip" class="text-[10px] font-bold text-[#9b9b9b] uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-circle-dot"></i> INITIALIZING
             </div>
-            <button onclick="location.reload()" class="p-2 hover:bg-[#f7f6f3] rounded-full transition-colors">
-                <i data-lucide="refresh-cw" class="w-4 h-4 text-[#787774]"></i>
-            </button>
+            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 px-2 py-1 rounded">V3: FULL ARCHITECTURE BLUEPRINT</span>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Content -->
-    <main class="flex-1 flex overflow-hidden relative">
-        
-        <!-- Graph Canvas -->
-        <div id="canvas-container" class="flex-1 overflow-hidden flex items-center justify-center p-8 bg-[#fbfbfa]">
-            <div id="mermaid-graph" class="mermaid opacity-0 transition-opacity duration-500">
-                <!-- Mermaid SVG will be rendered here -->
-            </div>
-            
-            <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-[#f7f6f3]/80 z-20 transition-opacity">
-                <div class="animate-spin mb-4 inline-block text-[#2383e2]">
-                    <i data-lucide="loader-2" class="w-10 h-10"></i>
-                </div>
-                <p class="font-bold text-[#787774] uppercase tracking-widest text-xs">Synthesizing Graph...</p>
+    <!-- Canvas Area -->
+    <main class="relative flex-1 bg-white overflow-hidden">
+        <div id="loader-overlay">
+            <div class="animate-spin mb-4 text-[#2383e2]"><i class="fas fa-spinner fa-2x"></i></div>
+            <p class="font-bold text-xs uppercase tracking-[0.2em] text-[#787774]">Synthesizing Live Blueprint...</p>
+        </div>
+
+        <div id="mermaid-root">
+            <div class="mermaid-container" id="mermaid-svg-container">
+                <!-- Mermaid will render here -->
             </div>
         </div>
 
-        <!-- Detail Sidebar -->
-        <aside id="sidebar" class="sidebar closed fixed right-0 top-0 bottom-0 w-[450px] bg-white border-l border-[#e9e9e7] shadow-2xl z-30 flex flex-col">
-            <div class="p-8 flex flex-col h-full overflow-y-auto">
-                <div class="flex items-center justify-between mb-10">
-                    <div class="px-3 py-1 bg-[#2383e2]/10 text-[#2383e2] text-[10px] font-bold rounded-full uppercase tracking-[0.2em]">
-                        Node Intelligence
-                    </div>
-                    <button onclick="closeSidebar()" class="p-2 hover:bg-[#f7f6f3] rounded-full transition-colors">
-                        <i data-lucide="x" class="w-5 h-5 text-[#787774]"></i>
-                    </button>
-                </div>
+        <div id="controls">
+            <button class="control-btn" id="zoom-in" title="Zoom In"><i class="fas fa-plus text-xs"></i></button>
+            <button class="control-btn" id="zoom-out" title="Zoom Out"><i class="fas fa-minus text-xs"></i></button>
+            <button class="control-btn" id="zoom-reset" title="Reset View"><i class="fas fa-expand text-xs"></i></button>
+        </div>
 
-                <div id="node-header" class="mb-10 flex items-center gap-5">
-                    <!-- Dynamic Content -->
+        <!-- Floating Tooltip (Dynamic Metadata) -->
+        <div id="floating-tooltip" class="bg-white border border-[#e9e9e7] rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 id="tooltip-title" class="text-lg font-bold text-[#37352f]">Node Title</h3>
+                    <p id="tooltip-code" class="text-[9px] font-mono text-blue-500 mt-1 opacity-70"></p>
                 </div>
-
-                <div class="space-y-10" id="node-details">
-                    <!-- Dynamic Content -->
+                <span id="tooltip-badge" class="badge badge-logic">Category</span>
+            </div>
+            <p id="tooltip-desc" class="text-xs leading-relaxed text-[#787774]">Description.</p>
+            <div id="tooltip-io" class="grid grid-cols-2 gap-4 pt-2">
+                <div>
+                    <span class="badge badge-in mb-2 block w-fit">Incoming</span>
+                    <ul id="tooltip-input" class="text-[10px] font-semibold space-y-1"></ul>
                 </div>
-
-                <div class="mt-auto pt-12 border-t border-[#e9e9e7] text-[10px] text-[#787774] text-center uppercase tracking-[0.3em] font-bold">
-                    System Architecture Insight
+                <div>
+                    <span class="badge badge-out mb-2 block w-fit">Outgoing</span>
+                    <ul id="tooltip-output" class="text-[10px] font-semibold space-y-1 text-green-700"></ul>
                 </div>
             </div>
-        </aside>
+        </div>
     </main>
 
     <script type="module">
@@ -131,31 +143,25 @@
         const API_GRAPH = 'http://localhost:8000/api/v1/viz/graph';
         
         let nodesMetadata = [];
+        let scale = 1.0;
+        let translateX = 0;
+        let translateY = 0;
 
-        // Global callback for Mermaid click events
-        window.handleNodeClick = function(nodeId) {
-            console.log("Clicked node:", nodeId);
-            const cleanId = nodeId.replace(/["']/g, ''); // Clean quotes if any
-            showDetails(cleanId);
-        };
+        const tooltip = document.getElementById('floating-tooltip');
+        const container = document.getElementById('mermaid-root');
+        const target = document.getElementById('mermaid-svg-container');
 
         async function init() {
-            lucide.createIcons();
-            
-            // Initialize Mermaid with 'loose' security to allow click events
             mermaid.initialize({ 
                 startOnLoad: false,
                 securityLevel: 'loose',
                 theme: 'neutral',
                 fontFamily: 'Inter',
-                flowchart: {
-                    useMaxWidth: false,
-                    htmlLabels: true,
-                    curve: 'basis'
-                }
+                flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: false }
             });
 
             await fetchAndRender();
+            setupInteractions();
         }
 
         async function fetchAndRender() {
@@ -170,103 +176,149 @@
                 nodesMetadata = await nodesRes.json();
                 const graphData = await graphRes.json();
                 
-                let mermaidDefinition = graphData.mermaid;
+                const { svg } = await mermaid.render('architecture-graph', graphData.mermaid);
                 
-                // Enhanced Mermaid Definition: Add click handlers for all nodes
-                const nodeIds = nodesMetadata.map(n => n.node_id);
-                nodeIds.forEach(id => {
-                    // Syntax: click nodeID call handleNodeClick("nodeID")
-                    mermaidDefinition += `\n    click ${id} call handleNodeClick("${id}")`;
-                });
-
-                const container = document.getElementById('mermaid-graph');
-                const { svg, bindFunctions } = await mermaid.render('architecture-graph', mermaidDefinition);
+                target.innerHTML = svg;
+                document.getElementById('loader-overlay').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader-overlay').remove(), 500);
                 
-                container.innerHTML = svg;
-                container.classList.remove('opacity-0');
-                document.getElementById('loader').classList.add('opacity-0');
-                setTimeout(() => document.getElementById('loader').remove(), 500);
+                document.getElementById('status-chip').innerHTML = '<i class="fas fa-circle-dot text-green-500"></i> LIVE CONNECTED';
+                document.getElementById('status-chip').className = "text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-2";
 
-                if (bindFunctions) {
-                    bindFunctions(container);
-                }
-
+                attachNodeListeners();
             } catch (err) {
                 console.error(err);
-                document.getElementById('loader').innerHTML = `
-                    <div class="text-red-500 mb-4"><i data-lucide="alert-circle" class="w-12 h-12 mx-auto"></i></div>
-                    <p class="font-bold text-red-500 uppercase tracking-tighter text-sm">System Backend Offline</p>
-                    <p class="text-[10px] mt-2 text-[#787774] font-medium uppercase tracking-widest">Run: uvicorn core.api:app</p>
+                document.getElementById('loader-overlay').innerHTML = `
+                    <div class="text-red-500 mb-4"><i class="fas fa-circle-exclamation fa-2x"></i></div>
+                    <p class="font-bold text-red-500 uppercase tracking-widest text-xs">Core API Offline</p>
+                    <p class="text-[10px] mt-4 text-[#787774]">Please run: <b>python core/api.py</b></p>
                 `;
-                lucide.createIcons();
             }
         }
 
-        function showDetails(nodeId) {
-            const node = nodesMetadata.find(n => n.node_id === nodeId);
+        function setupInteractions() {
+            const updateTransform = () => {
+                target.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            };
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                scale = Math.min(Math.max(0.1, scale * delta), 5);
+                updateTransform();
+            }, { passive: false });
+
+            let isDragging = false;
+            let startX, startY;
+
+            container.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.node')) return;
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                container.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                container.style.cursor = 'grab';
+            });
+
+            document.getElementById('zoom-in').onclick = () => { scale *= 1.2; updateTransform(); };
+            document.getElementById('zoom-out').onclick = () => { scale *= 0.8; updateTransform(); };
+            document.getElementById('zoom-reset').onclick = () => { scale = 1.0; translateX = 0; translateY = 0; updateTransform(); };
+            
+            updateTransform();
+        }
+
+        function attachNodeListeners() {
+            // Using a mutation observer to catch when Mermaid finished injecting the SVG
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', (e) => {
+                    // Extract ID from Mermaid generated ID (e.g., flow-classify-45)
+                    const labelEl = node.querySelector('.nodeLabel');
+                    const label = labelEl ? labelEl.innerText.split(' ')[0] : '';
+                    showTooltip(label, e.clientX, e.clientY);
+                });
+                node.addEventListener('mousemove', (e) => {
+                    if (tooltip.classList.contains('visible')) {
+                        positionTooltip(e.clientX, e.clientY);
+                    }
+                });
+                node.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+            });
+        }
+
+        function showTooltip(label, x, y) {
+            // Normalize label for matching (e.g., "classify (Node)" -> "classify")
+            const rawLabel = label.split('(')[0].trim();
+            const term = rawLabel.toLowerCase().replace(/[^a-z0-9_]/g, '');
+            
+            // Support matching both node_id and external names
+            let node = nodesMetadata.find(n => {
+                const id = n.node_id.toLowerCase();
+                // Match exact normalized ID, or check if normalized label contains ID or vice versa
+                return id === term || id.includes(term) || term.includes(id);
+            });
+            
+            // Hardcoded fallback for specialized UI elements or missing mappings
             if (!node) {
-                // If node metadata is missing (e.g. entry/end nodes), don't show sidebar
-                if (['__start__', '__end__'].includes(nodeId)) return;
-                console.warn("No metadata for node:", nodeId);
+                if (term.includes('userinput') || term === 'user') {
+                    node = {
+                        node_id: 'USER',
+                        role: 'CLIENT',
+                        description: 'The primary interface for natural language interaction and system control.',
+                        code_mapping: 'frontend/src/App.tsx',
+                        io_schema: { type: 'User Query', output: 'API Request' }
+                    };
+                } else if (term.includes('notionsouldb')) {
+                    node = nodesMetadata.find(n => n.node_id === 'SqliteDB');
+                } else if (term.includes('tasksuttable')) {
+                    node = nodesMetadata.find(n => n.node_id === 'TasksDB');
+                } else if (term.includes('memoryconsolidator')) {
+                    node = nodesMetadata.find(n => n.node_id === 'MemConsol');
+                } else if (term.includes('gemini31vision')) {
+                    node = nodesMetadata.find(n => n.node_id === 'GeminiVision');
+                }
+            }
+
+            if (!node) {
+                console.warn("No metadata match for label:", label, " (normalized term:", term, ")");
                 return;
             }
 
-            const header = document.getElementById('node-header');
-            const details = document.getElementById('node-details');
+            document.getElementById('tooltip-title').innerText = node.node_id.replace(/_/g, ' ').toUpperCase();
+            document.getElementById('tooltip-badge').innerText = node.role;
+            document.getElementById('tooltip-desc').innerText = node.description;
+            document.getElementById('tooltip-code').innerText = node.code_mapping;
+            
+            document.getElementById('tooltip-input').innerHTML = `<li>• ${node.io_schema.type || node.io_schema.input || 'AgentState'}</li>`;
+            document.getElementById('tooltip-output').innerHTML = `<li>• ${node.io_schema.output || 'AgentState'}</li>`;
 
-            header.innerHTML = `
-                <div class="w-16 h-16 rounded-2xl bg-[#2383e2] flex items-center justify-center text-white shadow-xl shadow-[#2383e2]/20">
-                    <i data-lucide="cpu" class="w-8 h-8"></i>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-black text-[#37352f] leading-none mb-1 capitalize">${node.node_id.replace(/_/g, ' ')}</h2>
-                    <p class="text-xs text-[#787774] font-bold uppercase tracking-[0.1em]">${node.role}</p>
-                </div>
-            `;
-
-            details.innerHTML = `
-                <section>
-                    <h3 class="text-[11px] font-black text-[#787774] uppercase tracking-[0.25em] mb-4 flex items-center gap-3">
-                        <i data-lucide="book-open" class="w-4 h-4"></i> Description
-                    </h3>
-                    <div class="bg-[#f7f6f3] p-6 rounded-2xl border border-[#e9e9e7] text-sm leading-relaxed text-[#37352f] italic">
-                        "${node.description}"
-                    </div>
-                </section>
-
-                <section>
-                    <h3 class="text-[11px] font-black text-[#787774] uppercase tracking-[0.25em] mb-4 flex items-center gap-3">
-                        <i data-lucide="code-2" class="w-4 h-4"></i> Source Implementation
-                    </h3>
-                    <div class="bg-[#1e1e1e] p-4 rounded-xl text-[#d4d4d4] text-xs font-mono break-all border border-black/50 shadow-inner">
-                        ${node.code_mapping}
-                    </div>
-                </section>
-
-                <section>
-                    <h3 class="text-[11px] font-black text-[#787774] uppercase tracking-[0.25em] mb-4 flex items-center gap-3">
-                        <i data-lucide="git-branch" class="w-4 h-4"></i> Input/Output Pattern
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-white border border-[#e9e9e7] rounded-xl">
-                            <p class="text-[9px] font-bold text-[#787774] uppercase mb-1">Incoming</p>
-                            <p class="text-xs font-bold text-[#2383e2]">${node.io_schema.type || 'AgentState'}</p>
-                        </div>
-                        <div class="p-4 bg-white border border-[#e9e9e7] rounded-xl">
-                            <p class="text-[9px] font-bold text-[#787774] uppercase mb-1">Outgoing</p>
-                            <p class="text-xs font-bold text-[#2383e2]">${node.io_schema.output || 'AgentState'}</p>
-                        </div>
-                    </div>
-                </section>
-            `;
-
-            document.getElementById('sidebar').classList.remove('closed');
-            lucide.createIcons();
+            positionTooltip(x, y);
+            tooltip.classList.add('visible');
         }
 
-        window.closeSidebar = function() {
-            document.getElementById('sidebar').classList.add('closed');
-        };
+        function positionTooltip(x, y) {
+            const padding = 25;
+            let posX = x + padding;
+            let posY = y + padding;
+
+            if (posX + tooltip.offsetWidth > window.innerWidth) posX = x - tooltip.offsetWidth - padding;
+            if (posY + tooltip.offsetHeight > window.innerHeight) posY = y - tooltip.offsetHeight - padding;
+
+            tooltip.style.left = `${posX}px`;
+            tooltip.style.top = `${posY}px`;
+        }
 
         window.onload = init;
     </script>
