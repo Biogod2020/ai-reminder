@@ -1,3 +1,55 @@
-.env
-.venv/
+# Logs
+*.log
+logs/
+*.log.*
+
+# Database temporary files
+*-shm
+*-wal
+*.db-journal
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Project specific
+.stress_mem0_db/
+.debug_mem0_db/
+.mem0_db/
+soul_gallery/proc_*.jpg
+behavior_log_raw_*.json
+api_demo.log
+api_native.log
+api_proxy.log
+api_stress.log
+api_test.log
+backend_verify.log
+backend.log
+chainlit.log
+dev_*.log
+dev.log
+frontend_verify.log
+static_serve.log
+static.log
