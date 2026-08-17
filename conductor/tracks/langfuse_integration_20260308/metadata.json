@@ -1,8 +1,0 @@
-{
-  "track_id": "langfuse_integration_20260308",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-03-08T17:30:00Z",
-  "updated_at": "2026-03-08T17:30:00Z",
-  "description": "将langfuse结合到当前的agent里面"
-}

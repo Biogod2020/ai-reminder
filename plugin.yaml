@@ -1,0 +1,51 @@
+name: ai-reminder
+version: 1.0.0
+manifest_version: 2
+api_version: 1
+description: Privacy-first, constraint-based personal scheduling secretary for Hermes.
+author: Biogod2020
+license: MIT
+homepage: https://github.com/Biogod2020/ai-reminder
+tags: [productivity, calendar, scheduling, personal-assistant, optimization]
+provides_tools:
+  - secretary_task
+  - secretary_plan
+  - secretary_feedback
+  - secretary_preferences
+  - secretary_brief
+  - secretary_health
+provides_hooks:
+  - pre_llm_call
+config_schema:
+  data_dir:
+    type: str
+    default: ~/.hermes/data/ai-reminder
+    description: Directory for the profile-local SQLite database.
+  timezone:
+    type: str
+    default: UTC
+    description: IANA timezone, for example America/Los_Angeles or Asia/Shanghai.
+  slot_minutes:
+    type: int
+    default: 15
+    description: Scheduling time-grid size.
+  planning_horizon_days:
+    type: int
+    default: 7
+    description: Default planning horizon when no window end is supplied.
+  transition_buffer_minutes:
+    type: int
+    default: 0
+    description: Reserved transition time after each focus block.
+  nudge_grace_minutes:
+    type: int
+    default: 10
+    description: Delay after a block starts before a start-check becomes eligible.
+  autonomy_mode:
+    type: str
+    default: propose
+    description: observe, propose, or focus_blocks. Calendar confirmation rules still apply.
+  inject_context:
+    type: bool
+    default: true
+    description: Inject a compact scheduling snapshot only on schedule-related turns.

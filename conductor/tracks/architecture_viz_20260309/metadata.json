@@ -1,8 +1,0 @@
-{
-  "track_id": "architecture_viz_20260309",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-03-09T00:00:00Z",
-  "updated_at": "2026-03-09T00:00:00Z",
-  "description": "请你仔细阅读我们当前的项目，然后为我们的项目绘制一个sota级别的mermaid图来展示我们当前项目的架构+工作流程，放在html文档里面，然后后面还要附上每个节点的输入+输出+功能介绍"
-}

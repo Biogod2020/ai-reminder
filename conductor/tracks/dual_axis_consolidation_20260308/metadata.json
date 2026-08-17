@@ -1,8 +1,0 @@
-{
-  "track_id": "dual_axis_consolidation_20260308",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-03-08T00:00:00Z",
-  "updated_at": "2026-03-08T00:00:00Z",
-  "description": "当前的压缩+记忆功能有用到我们创造出来的时间轴信息吗？请你仔细检查一下，并且设计一个模拟真实情况的测试"
-}

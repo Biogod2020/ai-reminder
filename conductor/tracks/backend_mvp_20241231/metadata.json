@@ -1,8 +1,0 @@
-{
-  "track_id": "backend_mvp_20241231",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2024-12-31T00:00:00Z",
-  "updated_at": "2024-12-31T00:00:00Z",
-  "description": "Refine backend to MVP level with full persistence, ADaPT logic, and API optimization"
-}
