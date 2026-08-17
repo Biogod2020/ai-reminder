@@ -1,55 +1,30 @@
-# Logs
-*.log
-logs/
-*.log.*
-
-# Database temporary files
-*-shm
-*-wal
-*.db-journal
-
-# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.egg-info/
+build/
+dist/
 .venv/
-env/
-venv/
 .pytest_cache/
 .ruff_cache/
-.mypy_cache/
+.coverage
+htmlcov/
 
-# OS
+# Local Hermes/plugin state
+.hermes/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+
+# Personal data and exports
+USER.md
+MEMORY.md
+SOUL.md
+user_soul.md
+exports/
+
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-frontend/.env.local
-
-# Project specific
-.stress_mem0_db/
-.debug_mem0_db/
-.mem0_db/
-soul_gallery/proc_*.jpg
-behavior_log_raw_*.json
-api_demo.log
-api_native.log
-api_proxy.log
-api_stress.log
-api_test.log
-backend_verify.log
-backend.log
-chainlit.log
-dev_*.log
-dev.log
-frontend_verify.log
-static_serve.log
-static.log
