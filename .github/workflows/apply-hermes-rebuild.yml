@@ -27,7 +27,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .rebuild/chunk-*.b64 | base64 --decode > /tmp/ai-reminder-rebuild.tar.gz
+          {
+            head -c 6500 .rebuild/chunk-00a.b64
+            cat .rebuild/chunk-00b.b64 \
+              .rebuild/chunk-01.b64 \
+              .rebuild/chunk-02.b64 \
+              .rebuild/chunk-03.b64 \
+              .rebuild/chunk-04.b64
+          } | base64 --decode > /tmp/ai-reminder-rebuild.tar.gz
           echo "7d3d59043a53aa8eebcddf10b98eed6a5cb719b844bbe0767e6adde9c8fbafb8  /tmp/ai-reminder-rebuild.tar.gz" | sha256sum --check -
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           tar -xzf /tmp/ai-reminder-rebuild.tar.gz -C .
